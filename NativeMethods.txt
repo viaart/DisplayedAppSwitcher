@@ -1,0 +1,17 @@
+﻿ShowWindow
+ShowWindowAsync
+SetWindowPos
+SetForegroundWindow
+
+GetWindowLong
+SendMessage
+
+GetWindowText
+
+FindWindowEx
+
+GetClassName
+
+RegisterHotKey
+UnregisterHotKey
+

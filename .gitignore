@@ -1,0 +1,9 @@
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+*.nupkg
+**/packages/*
+!**/packages/build/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*

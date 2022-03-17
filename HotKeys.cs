@@ -7,8 +7,8 @@ namespace DisplayedAppSwitcher {
     public const int switchHotKeyId = 100;
     public const int oneHotKeyId = 101;
     public const int oneHotKeySubId = 102;
-    public const int secondHotKeyId = 102;
-    public const int secondHotKeySubId = 103;
+    public const int secondHotKeyId = 103;
+    public const int secondHotKeySubId = 104;
 
     public static void Register(IntPtr handle) {
       var h = new HWND(handle);

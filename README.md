@@ -1,24 +1,24 @@
-﻿# DisplayedAppSwitcher
+﻿![Icon32x32](https://user-images.githubusercontent.com/8169082/158886944-8b8e202b-2643-40c5-ba8e-555b157b62ea.png) 
+# DisplayedAppSwitcher
 
 This application helps with switching between JW Library and Zoom, when these two apps both 
 have a secondary window running on the second monitor.
 
 ## Usage 
 
-The DisplayAppSwitcher icon sits in the taskbar and can be double clicked to perform a switch.
-There is also a context menu with available commands that becomes visible when right clicking on the tray icon.
+The DisplayAppSwitcher icon ![Icon16x16](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) sits in the taskbar and can be double clicked to perform a switch. There is also a context menu with available commands that becomes visible when right clicking on the tray icon.
 
 Switches can also be done by means of keyboard shortcuts or a secondary device, such as Stream Deck, where a button can be assigned as an alias to a keyboard shortcut to further minimize human error and improve technical quality.
 
 Currently the shortcuts are assigned as follows:
 
 * Switch to the next (`Ctrl-NumPad 0`)
-	* Double clicking the tray icon does the same.
 	* Right clicking on “Switch” in the context menu does the same.
-* Switch to JW Library (`Ctrl-NumPad 1`)
+    * Double clicking the tray icon does the same.
+* Switch to JW Library (`Ctrl-NumPad 1` or `F5`)
 	* Right clicking on “JW Library” in the context menu does the same.
-* Switch to Zoom (`Ctrl-NumPad 2`)
-* Right clicking on “Zoom” in the context menu does the same.
+* Switch to Zoom (`Ctrl-NumPad 2` or `F6`)
+    * Right clicking on “Zoom” in the context menu does the same.
 
 
 ## Setup

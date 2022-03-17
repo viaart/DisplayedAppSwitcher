@@ -21,10 +21,12 @@ namespace DisplayedAppSwitcher {
           case HotKeys.switchHotKeyId:
             DoSwitch(null, EventArgs.Empty);
             break;
-          case HotKeys.oneHotKeyId | HotKeys.oneHotKeySubId:
+          case HotKeys.oneHotKeyId:
+          case HotKeys.oneHotKeySubId:
             BringToTop(AppType.JWLibrary);
             break;
-          case HotKeys.secondHotKeyId | HotKeys.secondHotKeySubId:
+          case HotKeys.secondHotKeyId:
+          case HotKeys.secondHotKeySubId:
             BringToTop(AppType.Zoom);
             break;
         }

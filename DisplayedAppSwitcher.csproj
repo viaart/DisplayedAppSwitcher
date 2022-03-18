@@ -12,6 +12,10 @@
 
 The icon sits in the taskbar and can be double clicked to perform a switch. It also has a Context Menu to choose which application to switch to.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>True</DelaySign>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/viaart/DisplayedAppSwitcher</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,6 +53,10 @@ The icon sits in the taskbar and can be double clicked to perform a switch. It a
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
     <None Update="Resources\Icon\Icon128x128.png">
       <Pack>True</Pack>

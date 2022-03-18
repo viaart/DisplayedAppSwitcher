@@ -35,13 +35,21 @@ Make sure to turn on “Play video on a second display” in the settings in the
 
 In the “General” settings of Zoom, check “Use dual monitors.” It does not look like changing this setting during the already running meeting actually modifies Zoom's behavior, so it is vital to start or join with the “Use dual monitors” turned on beforehand.
 
+> Currently Zoom completely disables participants video grid during sharing in the “Use dual monitors” mode, there is no Side-by-side setting available.
+
 Make sure Zoom is started and running before attempting a switch to Zoom using this utility, otherwise Zoom's window that is internally designated for the dual screen will appear with a blank canvas. (This is not harmful to Zoom in any way; it just indicates that Zoom is not in the dual-monitor mode, or that the Zoom meeting has not been started.)
 
 Zoom's dual monitor window needs to be dragged to the secondary monitor and double clicked, inside the window, to make it full screen. It has no meeting controls, which makes it easy to distinguish it from the other Zoom windows. This has to be done every time the Zoom meeting starts.
 
 ### DisplayedAppSwitcher
 
-Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section, install it and ignore the Unknown Publisher warning. Run either from the desktop link, or Start menu.
+* Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - either `setup.exe` or the `*.msi` file.
+   * If the browser informs that it is not allowing to download the file from an unverified developer, try another browser (I've never been a .Net developer, so please bear with me while I'm working out that developer recognition).
+* Install the app and ignore the Unknown Publisher warning and let it "Run Anyway".
+* Run either from the desktop link, or Start menu.
+    * If `Net 6.0 Runtime` is not installed, the prompt will show leading to the page to get the installer.
+        * Grab the `Run desktop apps` > `Download x64` one.
+        * Install and try to restart DisplayedAppSwitcher.
 
 > Alternatively, use "Visual Studio 2022" for open source licenses to compile and run from the manually built location.
 
@@ -70,10 +78,15 @@ DisplayedAppSwitcher hides the secondary Zoom window when it is used to switch t
     * 5.9.3 (3169)
     * 5.9.7 (3931)
 
-## TODO
+# TODO
 
 The following things could be done to improve the tool:
 
-* Auto Update
-* Settings to designate keyboard shortcuts.
-* Different behaviors depending on application versions.
+- [ ] Auto Update
+- [ ] Custom keyboard shortcuts.
+- [ ] Different behaviors depending on application versions.
+
+
+# Changelog
+
+- [x] Singleton - only one app allowed to run at a time - `v1.0.0.1`.

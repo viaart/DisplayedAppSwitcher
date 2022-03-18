@@ -81,6 +81,8 @@ namespace DisplayedAppSwitcher {
 
     void BringToTop(AppType appTypeIndex) {
       var switcher = switchers[(int)appTypeIndex];
+      // And remember the last one in case it's called aside of switch
+      lastSwitcherIndex = (int)appTypeIndex;
 
       Windows.Win32.Foundation.HWND hWndParent = new(IntPtr.Zero);
 

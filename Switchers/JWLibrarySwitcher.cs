@@ -2,7 +2,7 @@
 
 namespace DisplayedAppSwitcher {
   public class JWLibrarySwitcher : ISwitcher {
-    public bool IsTheRightWindow(string title, string className, uint styleFlags, uint exStyleFlags) {
+    public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
       // JW Library creates several windows for dual monitor, all of them are called "JW Library".
       // Also both have a class "ApplicationFrameWindow". They both technically consist of the same varying hierarchy of children:
       //
@@ -23,12 +23,12 @@ namespace DisplayedAppSwitcher {
       //     + "CoreInput" Windows.UI.Core.CoreComponentInputSource
       //
       // The only distinguishing difference seems to be that the secondary monitor window
-      // has an Extended Style Flag of:
+      // has an Extended Style with a flag of:
       //   WS_EX_TOPMOST
       // 
-      return title == "JW Library"
-            && className == "ApplicationFrameWindow"
-            && (exStyleFlags & Win32Constants.WS_EX_TOPMOST) != 0;
+      return info.title == "JW Library"
+            && info.className == "ApplicationFrameWindow"
+            && (info.exStyleFlags & Win32Constants.WS_EX_TOPMOST) != 0;
     }
 
     public void SwitchTo(IntPtr hWnd) {

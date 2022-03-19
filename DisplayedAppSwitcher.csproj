@@ -16,7 +16,7 @@ The DisplayAppSwitcher icon sits in the taskbar and can be double clicked to per
     <DelaySign>True</DelaySign>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/viaart/DisplayedAppSwitcher</RepositoryUrl>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.2</Version>
     <Copyright>https://github.com/viaart/DisplayedAppSwitcher</Copyright>
     <Authors>viaart</Authors>
   </PropertyGroup>

@@ -2,20 +2,31 @@
 
 namespace DisplayedAppSwitcher {
   public class ZoomSwitcher : ISwitcher {
-    public bool IsTheRightWindow(string title, string className, uint styleFlags, uint exStyleFlags) {
+    public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
       // Zoom creates several windows. The one that we are to bring forward is named "Zoom".
       // It has a class "ZPContentViewWndClass".
-      // 
-      // Seems to be only one so far per Zoom app except when Zoom meeting is not started yet.
-      // In this case a blank window that wasn't previously shown will popup, so the
-      // way to avoid it will be to check whether the window is already visible or not.
-      //
-      // However currently we have to remove this because this code is also used in restoring the
-      // window back to its visible state from the hidden one.
-      return (title == "Zoom"
-            && className == "ZPContentViewWndClass");
+      if (info.title != "Zoom") return false;
+      if (info.className != "ZPContentViewWndClass") return false;
+
+      // When the meeting is not running, there's two windows with the "Zoom" title,
+      // so we will further filter down to just one based on the absense of children of the
+      // ContentRightPanel child.
+
+      var zeroHWND = new Windows.Win32.Foundation.HWND(IntPtr.Zero);
+      var panel_hWnd = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(info.hWnd),
+        zeroHWND,
+        null as string, "ContentRightPanel");
+      if (panel_hWnd != IntPtr.Zero) {
+        // The one without children should be ours
+        var hWnd_ = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(panel_hWnd),
+          zeroHWND,
+          null as string, null as string);
+        if (hWnd_ == IntPtr.Zero) {
+          return true;
+        }
+      }
+      return false;
       // (styleFlags & Consts.WS_VISIBLE) != 0)
-      ;
     }
 
     public void SwitchTo(IntPtr hWnd) {

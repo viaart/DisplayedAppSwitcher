@@ -90,11 +90,11 @@ namespace DisplayedAppSwitcher {
       while (true) {
         hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
         if (hWnd != IntPtr.Zero) {
-          (string? title, string? className, uint styleFlags, uint exStyleFlags) p = Win32Helpers.GetWindowInfo(hWnd);
-          switchers.ForEach(sw => {
-            if (!sw.Equals(switcher)) {
-              if (sw.IsTheRightWindow(p.title ?? "", p.className ?? "", p.styleFlags, p.exStyleFlags)) {
-                sw.OtherSwitchedBefore(hWnd);
+          var p = Win32Helpers.GetWindowInfo(hWnd);
+          switchers.ForEach(s => {
+            if (!s.Equals(switcher)) {
+              if (s.IsTheRightWindow(p, Purpose.Hide)) {
+                s.OtherSwitchedBefore(hWnd);
               }
             }
           });
@@ -107,26 +107,23 @@ namespace DisplayedAppSwitcher {
       while (true) {
         hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
         if (hWnd != IntPtr.Zero) {
-          (string? title, string? className, uint styleFlags, uint exStyleFlags) p = Win32Helpers.GetWindowInfo(hWnd);
-          switchers.ForEach(_ => {
-            if (switcher.IsTheRightWindow(p.title ?? "", p.className ?? "", p.styleFlags, p.exStyleFlags)) {
-              switcher.SwitchTo(hWnd);
-            }
-          });
+          var p = Win32Helpers.GetWindowInfo(hWnd);
+          if (switcher.IsTheRightWindow(p, Purpose.Show)) {
+            switcher.SwitchTo(hWnd);
+          }
         } else {
           break;
         }
       }
 
-      hWnd = IntPtr.Zero;
       while (true) {
         hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
         if (hWnd != IntPtr.Zero) {
-          (string? title, string? className, uint styleFlags, uint exStyleFlags) p = Win32Helpers.GetWindowInfo(hWnd);
-          switchers.ForEach(sw => {
-            if (!sw.Equals(switcher)) {
-              if (sw.IsTheRightWindow(p.title ?? "", p.className ?? "", p.styleFlags, p.exStyleFlags)) {
-                sw.OtherSwitchedAfter(hWnd);
+          var p = Win32Helpers.GetWindowInfo(hWnd);
+          switchers.ForEach(s => {
+            if (!s.Equals(switcher)) {
+              if (s.IsTheRightWindow(p, Purpose.Hide)) {
+                s.OtherSwitchedAfter(hWnd);
               }
             }
           });

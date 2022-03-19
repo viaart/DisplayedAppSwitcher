@@ -2,17 +2,34 @@
 
 namespace DisplayedAppSwitcher {
 
+  public class SwitcherWindowInfo {
+    public readonly IntPtr hWnd;
+    public readonly string title;
+    public readonly string className;
+    public readonly uint styleFlags;
+    public readonly uint exStyleFlags;
+    public SwitcherWindowInfo(IntPtr hWnd, string title, string className, uint styleFlags, uint exStyleFlags) {
+      this.hWnd = hWnd;
+      this.title = title;
+      this.className = className;
+      this.styleFlags = styleFlags;
+      this.exStyleFlags = exStyleFlags;
+    }
+  }
+
+  public enum Purpose {
+    Show,
+    Hide,
+  }
+
   public interface ISwitcher {
     /// <summary>
     /// IsTheRightWindow will be called to decide whether the window is the right window among the others,
     /// that are part of an application.
     /// </summary>
-    /// <param name="title"></param>
-    /// <param name="className"></param>
-    /// <param name="styleFlags"></param>
-    /// <param name="exStyleFlags"></param>
-    /// <returns></returns>
-    bool IsTheRightWindow(string title, string className, uint styleFlags, uint exStyleFlags);
+    /// <param name="info">Data for the window</param>
+    /// <param name="purpose">Purpose of the query</param>
+    bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose);
     void SwitchTo(IntPtr hWnd);
     /// <summary>
     /// What to fire before another switcher fires ISwitcher.SwitchTo.
@@ -35,7 +52,7 @@ namespace DisplayedAppSwitcher {
       public Buffer buffer = default;
     }
 
-    public static (string? title, string? className, uint styleFlags, uint exStyleFlags) GetWindowInfo(IntPtr hWnd) {
+    public static SwitcherWindowInfo GetWindowInfo(IntPtr hWnd) {
       var h = new Windows.Win32.Foundation.HWND(hWnd);
       var tBuffHolder = new BufferHolder();
       var cBuffHolder = new BufferHolder();
@@ -56,7 +73,7 @@ namespace DisplayedAppSwitcher {
       }
       uint styleFlags = (uint)PInvoke.GetWindowLong(h, Windows.Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX.GWL_STYLE);
       uint exStyleFlags = (uint)PInvoke.GetWindowLong(h, Windows.Win32.UI.WindowsAndMessaging.WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
-      return (s, c, styleFlags, exStyleFlags);
+      return new SwitcherWindowInfo(hWnd, s, c, styleFlags, exStyleFlags);
     }
 
   }

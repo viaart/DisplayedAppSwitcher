@@ -77,6 +77,7 @@ DisplayedAppSwitcher hides the secondary Zoom window when it is used to switch t
 * Zoom:
     * 5.9.3 (3169)
     * 5.9.7 (3931)
+        * This version (or earlier) introduced a new complication in recognizing the target window when the meeting is not running, which is handled by `v1.0.0.2`.
 
 # TODO
 
@@ -90,3 +91,4 @@ The following things could be done to improve the tool:
 # Changelog
 
 - [x] Singleton - only one app allowed to run at a time - `v1.0.0.1`.
+- [x] Filter out third Zoom window when the meeting is not running - `v1.0.2`.

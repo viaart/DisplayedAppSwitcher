@@ -8,7 +8,7 @@ This application helps with switching between JW Library and Zoom, when these tw
 * Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - the `DisplayedAppSwitcher.msi` file.
     * If the browser informs that it is not allowing to download the file from an unverified developer, try another browser.
         * I've never been a .Net developer, so please bear with me while I'm working on this issue in the future releases.
-* Install the app and ignore the Unknown Publisher warning by clicking "Show More" and then "Run Anyway".
+* Install the app and ignore the Unknown Publisher warning by clicking "More info" and then "Run anyway".
 * Run either from the desktop link, or Start menu.
     * If `Net 6.0 Runtime` is not installed, the prompt will show leading to the page to get the installer.
         * Grab the `Run desktop apps` > `Download x64` one.

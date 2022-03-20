@@ -5,10 +5,10 @@ This application helps with switching between JW Library and Zoom, when these tw
 
 ## Installation
 
-* Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - either `setup.exe` or the `*.msi` file.
-    * If the browser informs that it is not allowing to download the file from an unverified developer, try another browser
+* Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - the `DisplayedAppSwitcher.msi` file.
+    * If the browser informs that it is not allowing to download the file from an unverified developer, try another browser.
         * I've never been a .Net developer, so please bear with me while I'm working on this issue in the future releases.
-* Install the app and ignore the Unknown Publisher warning and let it "Run Anyway".
+* Install the app and ignore the Unknown Publisher warning by clicking "Show More" and then "Run Anyway".
 * Run either from the desktop link, or Start menu.
     * If `Net 6.0 Runtime` is not installed, the prompt will show leading to the page to get the installer.
         * Grab the `Run desktop apps` > `Download x64` one.
@@ -97,3 +97,4 @@ The following things could be done to improve the tool:
 
 - [x] Singleton - only one app allowed to run at a time - `v1.0.0.1`.
 - [x] Filter out third Zoom window when the meeting is not running - `v1.0.2`.
+- [x] Fix Zoom simply flashing when asked to go to the fore - `v1.0.3`.

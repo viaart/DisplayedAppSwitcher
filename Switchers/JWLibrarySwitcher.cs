@@ -55,10 +55,11 @@ namespace DisplayedAppSwitcher {
     }
 
     public void OtherSwitchedBefore(IntPtr hWnd) {
+      var h = new Windows.Win32.Foundation.HWND(hWnd);
+      PInvoke.ShowWindow(h, Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD.SW_MINIMIZE);
     }
 
     public void OtherSwitchedAfter(IntPtr hWnd) {
-
     }
 
   }

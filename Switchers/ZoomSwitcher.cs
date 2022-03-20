@@ -33,7 +33,12 @@ namespace DisplayedAppSwitcher {
       var h = new Windows.Win32.Foundation.HWND(hWnd);
       PInvoke.ShowWindow(h, Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD.SW_RESTORE);
       PInvoke.ShowWindow(h, Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD.SW_SHOW);
-      PInvoke.SetForegroundWindow(h);
+
+      // Attempting to get Zoom to foreground through something like Stream Deck makes it simply
+      // flash (apparently converting it into SetActiveWindow, FlashWindowEx sequence), perhaps
+      // because of the way Stream Deck has been activated.
+
+      //var result = PInvoke.SetForegroundWindow(h);
 
       // Full-Screen Zoom:
       // ===================================================

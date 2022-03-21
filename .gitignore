@@ -7,3 +7,5 @@
 !**/packages/build/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
+
+*.csproj.user

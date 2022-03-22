@@ -17,11 +17,9 @@ namespace DisplayedAppSwitcher {
       CenterToScreen();
     }
 
-
-
     #region Assembly Attribute Accessors
 
-    public string AssemblyTitle {
+    public static string AssemblyTitle {
       get {
         object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
         if (attributes.Length > 0) {
@@ -30,17 +28,17 @@ namespace DisplayedAppSwitcher {
             return titleAttribute.Title;
           }
         }
-        return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
+        return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location ?? "");
       }
     }
 
-    public string AssemblyVersion {
+    public static string AssemblyVersion {
       get {
-        return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        return Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "";
       }
     }
 
-    public string AssemblyDescription {
+    public static string AssemblyDescription {
       get {
         object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
         if (attributes.Length == 0) {
@@ -50,7 +48,7 @@ namespace DisplayedAppSwitcher {
       }
     }
 
-    public string AssemblyProduct {
+    public static string AssemblyProduct {
       get {
         object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
         if (attributes.Length == 0) {
@@ -60,7 +58,7 @@ namespace DisplayedAppSwitcher {
       }
     }
 
-    public string AssemblyCopyright {
+    public static string AssemblyCopyright {
       get {
         object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
         if (attributes.Length == 0) {
@@ -70,7 +68,7 @@ namespace DisplayedAppSwitcher {
       }
     }
 
-    public string AssemblyCompany {
+    public static string AssemblyCompany {
       get {
         object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
         if (attributes.Length == 0) {

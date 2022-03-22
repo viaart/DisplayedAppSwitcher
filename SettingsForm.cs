@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Windows.Win32;
 
 namespace DisplayedAppSwitcher {
@@ -140,14 +140,26 @@ namespace DisplayedAppSwitcher {
     private ContextMenuStrip trayMenu;
 
     public TrayIcon() {
+      ToolStripMenuItem v;
+
       trayMenu = new ContextMenuStrip();
-      trayMenu.Items.Add(new ToolStripMenuItem("JW Library", null, OnBringOneToTopClick));
-      trayMenu.Items.Add(new ToolStripMenuItem("Zoom", null, OnBringSecondToTopClick));
+
+      v = new ToolStripMenuItem("Switch", null, OnSwitchClick);
+      v.ShortcutKeyDisplayString = "Ctrl+NumPad0";
+      trayMenu.Items.Add(v);
       trayMenu.Items.Add(new ToolStripSeparator());
-      trayMenu.Items.Add(new ToolStripMenuItem("Switch", null, OnSwitchClick));
+
+      v = new ToolStripMenuItem("JW Library", null, OnBringOneToTopClick);
+      trayMenu.Items.Add(v);
+
+      v.ShortcutKeyDisplayString = "F9  |  Ctrl+NumPad1";
+      v = new ToolStripMenuItem("Zoom", null, OnBringSecondToTopClick);
+      trayMenu.Items.Add(v);
+
+      v.ShortcutKeyDisplayString = "F10  |  Ctrl+NumPad2";
       trayMenu.Items.Add(new ToolStripSeparator());
+
       trayMenu.Items.Add(new ToolStripMenuItem("About", null, OnAboutClick));
-      trayMenu.Items.Add(new ToolStripSeparator());
       trayMenu.Items.Add(new ToolStripMenuItem("Exit", null, OnExitClick));
 
       trayIcon = new NotifyIcon {

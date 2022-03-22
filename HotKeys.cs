@@ -20,13 +20,13 @@ namespace DisplayedAppSwitcher {
         (uint)Keys.NumPad1.GetHashCode());
       _ = PInvoke.RegisterHotKey(h, HotKeys.oneHotKeySubId,
         0,
-        (uint)Keys.F5.GetHashCode());
+        (uint)Keys.F9.GetHashCode());
       _ = PInvoke.RegisterHotKey(h, HotKeys.secondHotKeyId,
         HOT_KEY_MODIFIERS.MOD_CONTROL,
         (uint)Keys.NumPad2.GetHashCode());
       _ = PInvoke.RegisterHotKey(h, HotKeys.secondHotKeySubId,
         0,
-        (uint)Keys.F6.GetHashCode());
+        (uint)Keys.F10.GetHashCode());
     }
 
     public static void Unresister(IntPtr handle) {

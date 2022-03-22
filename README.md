@@ -6,8 +6,7 @@ This application helps with switching between JW Library and Zoom, when these tw
 ## Installation
 
 * Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - the `DisplayedAppSwitcher.msi` file.
-    * If the browser informs that it is not allowing to download the file from an unverified developer, try another browser.
-        * I've never been a .Net developer, so please bear with me while I'm working on this issue in the future releases.
+    * If the Edge browser informs that it is not allowing to download the file from an unverified developer, right click the file in the list of downloads and choose `Keep`, `Show More`, `Keep Anyway`.
 * Install the app and ignore the Unknown Publisher warning by clicking "More info" and then "Run anyway".
 * Run either from the desktop link, or Start menu.
     * If `Net 6.0 Runtime` is not installed, the prompt will show leading to the page to get the installer.
@@ -32,13 +31,14 @@ Currently the shortcuts are assigned as follows:
     * Double click the tray icon.
 * Switch to JW Library:
     * `Ctrl-NumPad 1`
-    * `F5`
+    * `F9`
 	* Right click on “JW Library” in the context menu.
 * Switch to Zoom:
     * `Ctrl-NumPad 2` 
-    * `F6`
+    * `F10`
     * Right click on “Zoom” in the context menu.
 
+Don't minimize the main Zoom window, otherwise the secondary Zoom window will also be restored from its hidden state when Zoom is asked to go to full size - and this will cover the JW Library on the secondary screen.
 
 ## Setup
 
@@ -56,16 +56,7 @@ If you switch to Zoom using this utility and Zoom's meeting is not running, Zoom
 
 Zoom's dual monitor window needs to be dragged to the secondary monitor and double clicked, anywhere inside the window, to make it full screen. It has no meeting controls, which makes it easy to distinguish it from the other Zoom windows. Double clicking has to be done every time the Zoom starts or joins a meeting.
 
-### Windows
-
-Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it visibly transitioning between the states. This animation can be disabled for all the windows in the system through the Windows Settings:
-
-* Hit `Win-R` to make the Run box show (or simply type Run in the search field and click found `Run` utility.)
-* Type `SystemPropertiesAdvanced` in the field and click OK to run it.
-* Go to `Advanced` Tab, and under the first box called `Performance`, click `Settings...`.
-* In the Performance Options, uncheck the `Animate windows when minimizing and maximizing`.
-* Keep clicking OK until all the windows are closed.
-
+During initial setup, other Zoom controls and windows may need to be moved to the desired locations, and Zoom seems to remember at least the monitors on which the controls should stay.
 
 ## Problem Description
 
@@ -109,3 +100,35 @@ The following things could be done to improve the tool:
 - [x] Singleton - only one app allowed to run at a time - `v1.0.0.1`.
 - [x] Filter out third Zoom window when the meeting is not running - `v1.0.2`.
 - [x] Fix Zoom simply flashing when asked to go to the fore - `v1.0.3`.
+- [x] Change keys `F5` & `F6` shortcuts to `F9` & `F10` as `F5` is clashing with the refreshing command - `v1.0.4`.
+
+# Tips & Tricks
+
+## Zoom
+
+To eliminate the green border that sometimes surrounds the shared screen / window, remove corresponding checkbox under the Zoom settings > Share Screen > Advanced.
+
+![Zoom_Qf2wq6NQYv](https://user-images.githubusercontent.com/8169082/159496415-cca06725-12d1-4867-bbdb-5ddaae8a76f1.gif)
+
+## Windows
+
+Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it visibly transitioning between the states. This animation can be disabled for all the windows in the system through the Windows Settings:
+
+* Hit `Win-R` to make the Run box show (or simply type Run in the search field and click found `Run` utility.)
+
+    ![explorer_XC3xmapz7t](https://user-images.githubusercontent.com/8169082/159505902-fb97ac59-cff4-4a1b-a2c7-b75844de56ef.png)
+
+* Type `SystemPropertiesAdvanced` in the field and click OK to run it.
+
+    ![SystemPropertiesAdvanced_jEyVllo0RI](https://user-images.githubusercontent.com/8169082/159498065-cfe0aced-ae7e-4ffd-a08c-e45f0c370886.png)
+
+* Go to `Advanced` Tab, and under the first box called `Performance`, click `Settings...`.
+
+    ![System Properties](https://user-images.githubusercontent.com/8169082/159497710-93ab33c1-5cf1-4c40-9d21-a72cefe6033d.jpg)
+
+* In the Performance Options, uncheck the `Animate windows when minimizing and maximizing`.
+
+    ![SystemPropertiesAdvanced_QYUforPgRw](https://user-images.githubusercontent.com/8169082/159497943-e8f8c8eb-1a62-45a8-baf5-9e2781e4d3e3.png)
+
+* Keep clicking OK until all the setting windows are closed.
+

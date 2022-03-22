@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace DisplayedAppSwitcher {
   partial class AboutBoxForm : Form {
@@ -78,5 +79,14 @@ namespace DisplayedAppSwitcher {
       }
     }
     #endregion
+
+    private void labelCopyright_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
+      try {
+        Process.Start(new ProcessStartInfo(((LinkLabel)sender).Text) { UseShellExecute = true });
+        this.Close();
+      } catch (Exception other) {
+        MessageBox.Show(other.Message);
+      }
+    }
   }
 }

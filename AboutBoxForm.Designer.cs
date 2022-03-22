@@ -27,7 +27,7 @@
       this.logoPictureBox = new System.Windows.Forms.PictureBox();
       this.labelProductName = new System.Windows.Forms.Label();
       this.labelVersion = new System.Windows.Forms.Label();
-      this.labelCopyright = new System.Windows.Forms.Label();
+      this.labelCopyright = new System.Windows.Forms.LinkLabel();
       this.labelCompanyName = new System.Windows.Forms.Label();
       this.textBoxDescription = new System.Windows.Forms.TextBox();
       this.okButton = new System.Windows.Forms.Button();
@@ -101,14 +101,17 @@
       // labelCopyright
       // 
       this.labelCopyright.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.labelCopyright.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(192)))));
       this.labelCopyright.Location = new System.Drawing.Point(167, 60);
       this.labelCopyright.Margin = new System.Windows.Forms.Padding(7, 0, 4, 0);
       this.labelCopyright.MaximumSize = new System.Drawing.Size(0, 20);
       this.labelCopyright.Name = "labelCopyright";
       this.labelCopyright.Size = new System.Drawing.Size(316, 20);
       this.labelCopyright.TabIndex = 21;
+      this.labelCopyright.TabStop = true;
       this.labelCopyright.Text = "Copyright";
       this.labelCopyright.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+      this.labelCopyright.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.labelCopyright_LinkClicked);
       // 
       // labelCompanyName
       // 
@@ -177,9 +180,9 @@
     private System.Windows.Forms.PictureBox logoPictureBox;
     private System.Windows.Forms.Label labelProductName;
     private System.Windows.Forms.Label labelVersion;
-    private System.Windows.Forms.Label labelCopyright;
     private System.Windows.Forms.Label labelCompanyName;
     private System.Windows.Forms.TextBox textBoxDescription;
     private System.Windows.Forms.Button okButton;
+    private LinkLabel labelCopyright;
   }
 }

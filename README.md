@@ -56,6 +56,17 @@ If you switch to Zoom using this utility and Zoom's meeting is not running, Zoom
 
 Zoom's dual monitor window needs to be dragged to the secondary monitor and double clicked, anywhere inside the window, to make it full screen. It has no meeting controls, which makes it easy to distinguish it from the other Zoom windows. Double clicking has to be done every time the Zoom starts or joins a meeting.
 
+### Windows
+
+Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it visibly transitioning between the states. This animation can be disabled for all the windows in the system through the Windows Settings:
+
+* Hit `Win-R` to make the Run box show (or simply type Run in the search field and click found `Run` utility.)
+* Type `SystemPropertiesAdvanced` in the field and click OK to run it.
+* Go to `Advanced` Tab, and under the first box called `Performance`, click `Settings...`.
+* In the Performance Options, uncheck the `Animate windows when minimizing and maximizing`.
+* Keep clicking OK until all the windows are closed.
+
+
 ## Problem Description
 
 1. Although the Zoom application supports dual-monitor mode, screen sharing is problematic when JW Library and Zoom, in full screen mode, are being used on the secondary display(s). When the screen share begins, Zoom’s secondary window jumps to the primary screen and completely covers it. This makes it difficult to access the JW Library app to play media.

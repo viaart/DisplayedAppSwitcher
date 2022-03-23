@@ -1,7 +1,25 @@
 ﻿![Icon32x32](https://user-images.githubusercontent.com/8169082/158886944-8b8e202b-2643-40c5-ba8e-555b157b62ea.png) 
 # DisplayedAppSwitcher
 
-This application helps with switching between JW Library and Zoom, when these two apps both have a secondary window running on the second monitor.
+This application makes it predictable as to which of the two applications - JW Library or Zoom - is seen on the second monitor.
+
+# TOC
+
+- [DisplayedAppSwitcher](#displayedappswitcher)
+- [TOC](#toc)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Setup](#setup)
+    - [JW Library](#jw-library)
+    - [Zoom](#zoom)
+  - [Problem Description](#problem-description)
+  - [Solution](#solution)
+  - [Known to work](#known-to-work)
+- [TODO](#todo)
+- [Changelog](#changelog)
+- [Tips & Tricks](#tips--tricks)
+  - [Zoom](#zoom-1)
+  - [Windows](#windows)
 
 ## Installation
 
@@ -85,14 +103,18 @@ DisplayedAppSwitcher hides the secondary Zoom window when it is used to switch t
     * 5.9.3 (3169)
     * 5.9.7 (3931)
         * This version (or earlier) introduced a new complication in recognizing the target window when the meeting is not running, which is handled by `v1.0.2`.
+    * 5.10.0 (4306)
+        * All the Zoom problems described above still exist and the tool is still helpful.
 
 # TODO
 
 The following things could be done to improve the tool:
 
-- [ ] Auto Update
+- [ ] Auto Building.
+- [ ] Auto Update.
 - [ ] Custom keyboard shortcuts.
 - [ ] Different behaviors depending on application versions.
+- [ ] Turn it into a universal tool with configurations.
 
 
 # Changelog
@@ -108,27 +130,25 @@ The following things could be done to improve the tool:
 
 To eliminate the green border that sometimes surrounds the shared screen / window, remove corresponding checkbox under the Zoom settings > Share Screen > Advanced.
 
-![Zoom_Qf2wq6NQYv](https://user-images.githubusercontent.com/8169082/159496415-cca06725-12d1-4867-bbdb-5ddaae8a76f1.gif)
+![](https://user-images.githubusercontent.com/8169082/159496415-cca06725-12d1-4867-bbdb-5ddaae8a76f1.gif)
 
 ## Windows
 
 Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it visibly transitioning between the states. This animation can be disabled for all the windows in the system through the Windows Settings:
 
 * Hit `Win-R` to make the Run box show (or simply type Run in the search field and click found `Run` utility.)
-
-    ![explorer_XC3xmapz7t](https://user-images.githubusercontent.com/8169082/159505902-fb97ac59-cff4-4a1b-a2c7-b75844de56ef.png)
-
 * Type `SystemPropertiesAdvanced` in the field and click OK to run it.
 
-    ![SystemPropertiesAdvanced_jEyVllo0RI](https://user-images.githubusercontent.com/8169082/159498065-cfe0aced-ae7e-4ffd-a08c-e45f0c370886.png)
+    ![](https://user-images.githubusercontent.com/8169082/159505902-fb97ac59-cff4-4a1b-a2c7-b75844de56ef.png)
+
 
 * Go to `Advanced` Tab, and under the first box called `Performance`, click `Settings...`.
 
-    ![System Properties](https://user-images.githubusercontent.com/8169082/159497710-93ab33c1-5cf1-4c40-9d21-a72cefe6033d.jpg)
+    ![](https://user-images.githubusercontent.com/8169082/159498065-cfe0aced-ae7e-4ffd-a08c-e45f0c370886.png)
 
 * In the Performance Options, uncheck the `Animate windows when minimizing and maximizing`.
 
-    ![SystemPropertiesAdvanced_QYUforPgRw](https://user-images.githubusercontent.com/8169082/159497943-e8f8c8eb-1a62-45a8-baf5-9e2781e4d3e3.png)
+    ![](https://user-images.githubusercontent.com/8169082/159497943-e8f8c8eb-1a62-45a8-baf5-9e2781e4d3e3.png)
 
 * Keep clicking OK until all the setting windows are closed.
 

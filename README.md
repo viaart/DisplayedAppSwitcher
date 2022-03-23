@@ -3,10 +3,7 @@
 
 This application makes it predictable as to which of the two applications - JW Library or Zoom - is seen on the second monitor.
 
-# TOC
-
 - [DisplayedAppSwitcher](#displayedappswitcher)
-- [TOC](#toc)
   - [Installation](#installation)
   - [Usage](#usage)
   - [Setup](#setup)

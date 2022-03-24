@@ -30,6 +30,8 @@ This application makes it predictable as to which of the two applications - JW L
 
 * Periodically check for new versions, as Auto Updating is not yet implemented.
 
+* (Optional) Make the tray icon always visible for easy access: Search for "Select which icons appear on the taskbar" setting and toggle the switch.
+
 > To build from source, clone the repository and open `*.csproj` in  "Visual Studio 2022" for open source licenses.
 
 ## Usage 
@@ -38,20 +40,19 @@ The DisplayAppSwitcher icon ![Icon16x16](https://user-images.githubusercontent.c
 
 Switches can also be done by means of keyboard shortcuts or a secondary device, such as Stream Deck, where a button can be assigned as an alias to a keyboard shortcut to further minimize human error and improve technical quality.
 
+* Right click tray icon to see the context menu.
+
 Currently the shortcuts are assigned as follows:
 
 * Switch to the next:
     * `Ctrl-NumPad 0`
-	* Right click on “Switch” in the context menu.
     * Double click the tray icon.
 * Switch to JW Library:
     * `Ctrl-NumPad 1`
     * `F9`
-	* Right click on “JW Library” in the context menu.
 * Switch to Zoom:
     * `Ctrl-NumPad 2` 
     * `F10`
-    * Right click on “Zoom” in the context menu.
 
 Don't minimize the main Zoom window, otherwise the secondary Zoom window will also be restored from its hidden state when Zoom is asked to go to full size - and this will cover the JW Library on the secondary screen.
 

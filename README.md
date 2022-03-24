@@ -32,7 +32,7 @@ This application makes it predictable as to which of the two applications - JW L
 
 * (Optional) Make the tray icon always visible for easy access: Search for "Select which icons appear on the taskbar" setting and toggle the switch.
 
-> To build from source, clone the repository and open `*.csproj` in  "Visual Studio 2022" for open source licenses.
+> To build from source, clone the repository and open `*.csproj` in "Microsoft Visual Studio 2022". Community Edition is enough to compile and use this open source project.
 
 ## Usage 
 

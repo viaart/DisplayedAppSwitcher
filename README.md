@@ -132,13 +132,9 @@ To eliminate the green border that sometimes surrounds the shared screen / windo
 
 ## Windows
 
-Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it visibly transitioning between the states. This animation can be disabled for all the windows in the system through the Windows Settings:
+Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it visibly transitioning between the states. This animation can be disabled for all the windows in the system through the Advanced system settings:
 
-* Hit `Win-R` to make the Run box show (or simply type Run in the search field and click found `Run` utility.)
-* Type `SystemPropertiesAdvanced` in the field and click OK to run it.
-
-    ![](https://user-images.githubusercontent.com/8169082/159505902-fb97ac59-cff4-4a1b-a2c7-b75844de56ef.png)
-
+* Start typing in Window search (Win+S): `Advanced System Settings` and select `View advanced system settings` (Control Panel) as soon as you see it.
 
 * Go to `Advanced` Tab, and under the first box called `Performance`, click `Settings...`.
 

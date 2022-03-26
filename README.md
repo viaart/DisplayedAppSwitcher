@@ -3,15 +3,17 @@
 
 This application makes it predictable as to which of the two applications - JW Library or Zoom - is seen on the second monitor.
 
+## Table of Contents
 - [DisplayedAppSwitcher](#displayedappswitcher)
+  - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Usage](#usage)
   - [Setup](#setup)
     - [JW Library](#jw-library)
     - [Zoom](#zoom)
   - [Problem Description](#problem-description)
-  - [Solution](#solution)
-  - [Known to work](#known-to-work)
+  - [Solution Overview](#solution-overview)
+  - [Known to Work](#known-to-work)
 - [TODO](#todo)
 - [Changelog](#changelog)
 - [Tips & Tricks](#tips--tricks)
@@ -82,17 +84,15 @@ During initial setup, other Zoom controls and windows may need to be moved to th
 
 3. Most of the time, JW Library should be seen on the secondary monitor, but Zoom’s window tends to cover it due to some Z-sorting or window priority issues. JW Library second window may suddenly go to a minimized mode when Share Screen is initiated.
 
-## Solution
+## Solution Overview
 
 DisplayedAppSwitcher provides a temporary solution, making the switching between Zoom and JW Library more predictable.
 
-In the meanwhile, the solution proposed here is to hide Zoom’s secondary window, when JW Library is to be seen. And then bring it back when requested.
-
-DisplayedAppSwitcher hides the secondary Zoom window when it is used to switch to JW Library. When switching back to Zoom, DisplayedAppSwitcher restores the hidden Zoom window to its previous visible state, including full screen mode. This helps to avoid all of the problems described above.
+This little tool completely hides the secondary Zoom window requested to switch to JW Library. When switching back to Zoom, DisplayedAppSwitcher restores the hidden Zoom window to its previous visible state, and Zoom retains its full screen mode, while minimizing JW Library to improve predictability. It never attempts to hide JW Library's secondary window.
 
 > Hopefully, Zoom will eventually find a way to fix window jumping behavior. And, perhaps JW Library will provide a more reliable way to keep itself on the top, when another application sits on the same screen. Then there will be no need for DisplayedAppSwitcher. Periodically check how everything works without DisplayedAppSwitcher.
 
-## Known to work
+## Known to Work
 
 * JW Library
     * 13.0.146 (157716)

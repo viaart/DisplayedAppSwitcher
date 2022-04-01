@@ -58,6 +58,8 @@ Currently the shortcuts are assigned as follows:
 
 Don't minimize the main Zoom window, otherwise the secondary Zoom window will also be restored from its hidden state when Zoom is asked to go to full size - and this will cover the JW Library on the secondary screen.
 
+If during an attempt to share screen JW Library accidentally minimizes, click one of the shortcuts to bring it back.
+
 ## Setup
 
 ### JW Library
@@ -88,9 +90,11 @@ During initial setup, other Zoom controls and windows may need to be moved to th
 
 DisplayedAppSwitcher provides a temporary solution, making the switching between Zoom and JW Library more predictable.
 
-This little tool completely hides the secondary Zoom window requested to switch to JW Library. When switching back to Zoom, DisplayedAppSwitcher restores the hidden Zoom window to its previous visible state, and Zoom retains its full screen mode, while minimizing JW Library to improve predictability. It never attempts to hide JW Library's secondary window.
+This little tool completely hides the secondary Zoom window requested to switch to JW Library. When switching back to Zoom, DisplayedAppSwitcher restores the hidden Zoom window to its previous visible state, and Zoom automatically retains its full screen mode, while minimizing JW Library to improve predictability. This tool never attempts to hide JW Library's secondary window (and in fact it does not seem possible).
 
-> Hopefully, Zoom will eventually find a way to fix window jumping behavior. And, perhaps JW Library will provide a more reliable way to keep itself on the top, when another application sits on the same screen. Then there will be no need for DisplayedAppSwitcher. Periodically check how everything works without DisplayedAppSwitcher.
+Also, DisplayedAppSwitcher is not maintaining the states of the applications constantly, but instead only once during actual request. This is to avoid too much meddling into the behavior of both applications and consequently big surprises.
+
+> Hopefully, Zoom will eventually find a way to fix window jumping behavior. And, perhaps JW Library will provide a more reliable way to keep itself on the top, when other applications might fight for staying on top of others. Then there will be no need for DisplayedAppSwitcher. Please periodically check how everything works without this tool and remove when it becomes unnecessary.
 
 ## Known to Work
 
@@ -100,9 +104,8 @@ This little tool completely hides the secondary Zoom window requested to switch 
 * Zoom:
     * 5.9.3 (3169)
     * 5.9.7 (3931)
-        * This version (or earlier) introduced a new complication in recognizing the target window when the meeting is not running, which is handled by `v1.0.2`.
     * 5.10.0 (4306)
-        * All the Zoom problems described above still exist and the tool is still helpful.
+    * 5.10.1 (4420)
 
 # TODO
 

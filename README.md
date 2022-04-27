@@ -60,6 +60,8 @@ Don't minimize the main Zoom window, otherwise the secondary Zoom window will al
 
 If during an attempt to share screen JW Library accidentally minimizes, click one of the shortcuts to bring it back.
 
+If Zoom crashes, it will restore itself, and rejoin the meeting as Host. At that moment Zoom's secondary window will take over. It's a good idea to be ready to tap `F9` while this is happening to prevent a random user seen.
+
 ## Setup
 
 ### JW Library
@@ -106,11 +108,13 @@ Also, DisplayedAppSwitcher is not maintaining the states of the applications con
     * 5.9.7 (3931)
     * 5.10.0 (4306)
     * 5.10.1 (4420)
+    * 5.10.3 (4851)
 
 # TODO
 
 The following things could be done to improve the tool:
 
+- [ ] Monitoring for new Zoom PID in case it crashes to restore the state.
 - [ ] Auto Building.
 - [ ] Auto Update.
 - [ ] Custom keyboard shortcuts.

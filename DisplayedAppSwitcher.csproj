@@ -10,9 +10,9 @@
     <PackageIcon>Icon128x128.png</PackageIcon>
     <Description>This application helps with switching between JW Library and Zoom, when these two apps both have a secondary window running on the second monitor.
 
-The DisplayAppSwitcher icon sits in the taskbar and can be double clicked to perform a switch. There is also a context menu with available commands that becomes visible when right clicking on the tray icon plus the keyboard shortcuts for those commands.</Description>
+The DisplayAppSwitcher icon sits in the system tray and can be double clicked to perform a switch. There is also a context menu with available commands that becomes visible when right clicking on the tray icon plus the keyboard shortcuts for those commands.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <SignAssembly>True</SignAssembly>
+    <SignAssembly>False</SignAssembly>
     <DelaySign>True</DelaySign>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/viaart/DisplayedAppSwitcher</RepositoryUrl>

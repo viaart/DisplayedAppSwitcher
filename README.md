@@ -1,6 +1,8 @@
-﻿# ![](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) Displayed App Switcher
+﻿# Displayed App Switcher
 
-This taskbar tool makes it predictable as to which of the two applications - JW Library or Zoom - is seen on the second monitor.
+Appears as a system tray icon: ![](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) when run.
+
+This tool makes it predictable as to which of the two applications - JW Library or Zoom - is seen on the second monitor.
 
 * Supported OS:
   * Windows 10 (64bit)
@@ -21,11 +23,13 @@ This taskbar tool makes it predictable as to which of the two applications - JW 
 * Periodically check for new versions, as Auto Updating is not yet implemented.
 * Remove this tool when it becomes unnecessary.
 
-* (Optional) Make the tray icon always visible for easy access: Search for "Select which icons appear on the taskbar" setting and toggle the switch.
+* (Optional) Make the tray icon always visible for easy access:
+  * Drag the icon from the hidden icons popup onto the system tray.
+  * Or search for "Control which system tray icons appear on the taskbar" setting and toggle the switch.
 
 ## Usage 
 
-The **Display App Switcher** icon ![Icon16x16](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) sits in the taskbar when run. There is a context menu with available commands that becomes visible when right clicking on the tray icon.
+The **Display App Switcher** icon ![Icon16x16](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) sits in the system tray when run. There is a context menu with available commands that becomes visible when right clicking on the tray icon.
 
 Currently the shortcuts are assigned as follows:
 

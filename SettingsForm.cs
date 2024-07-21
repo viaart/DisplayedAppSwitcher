@@ -6,12 +6,12 @@ public partial class SettingsForm : Form {
 
   public SettingsForm() {
     InitializeComponent();
-    switchers.Add(new JWLibrarySwitcher());
-    switchers.Add(new ZoomSwitcher());
+    switchers.Add(AppType.JWLibrary, new JWLibrarySwitcher());
+    switchers.Add(AppType.Zoom, new ZoomWorkspaceSwitcher());
     InitializeTrayIcon();
   }
 
-  private readonly List<ISwitcher> switchers = new List<ISwitcher>();
+  private readonly Dictionary<AppType, ISwitcher> switchers = new();
 
   protected override void WndProc(ref Message m) {
     if (m.Msg == Win32Constants.WM_HOTKEY) {
@@ -79,7 +79,7 @@ public partial class SettingsForm : Form {
   }
 
   void BringToTop(AppType appTypeIndex) {
-    var switcher = switchers[(int)appTypeIndex];
+    ISwitcher switcher = switchers[appTypeIndex]; // Throws an exception if not found. We are fine with the early error discovery.
     // And remember the last one in case it's called aside of switch
     lastSwitcherIndex = (int)appTypeIndex;
 
@@ -90,13 +90,14 @@ public partial class SettingsForm : Form {
       hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
       if (hWnd != IntPtr.Zero) {
         var p = Win32Helpers.GetWindowInfo(hWnd);
-        switchers.ForEach(s => {
-          if (!s.Equals(switcher)) {
-            if (s.IsTheRightWindow(p, Purpose.Hide)) {
-              s.OtherSwitchedBefore(hWnd);
+        foreach (var s in switchers) {
+          if (!s.Value.Equals(switcher)) {
+            if (s.Value.IsTheRightWindow(p, Purpose.Hide)) {
+              s.Value.OtherSwitchedBefore(hWnd);
             }
           }
-        });
+        }
+
       } else {
         break;
       }
@@ -119,13 +120,13 @@ public partial class SettingsForm : Form {
       hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
       if (hWnd != IntPtr.Zero) {
         var p = Win32Helpers.GetWindowInfo(hWnd);
-        switchers.ForEach(s => {
-          if (!s.Equals(switcher)) {
-            if (s.IsTheRightWindow(p, Purpose.Hide)) {
-              s.OtherSwitchedAfter(hWnd);
+        foreach (var s in switchers) {
+          if (!s.Value.Equals(switcher)) {
+            if (s.Value.IsTheRightWindow(p, Purpose.Hide)) {
+              s.Value.OtherSwitchedAfter(hWnd);
             }
           }
-        });
+        }
       } else {
         break;
       }

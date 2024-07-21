@@ -9,3 +9,5 @@
 [Bb]uild[Ll]og.*
 
 *.csproj.user
+
+.vs/

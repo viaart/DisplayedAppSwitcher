@@ -1,35 +1,54 @@
-﻿using Windows.Win32;
+﻿using System.Diagnostics;
+using Windows.Win32;
 
 namespace DisplayedAppSwitcher;
 
 public class JWLibrarySwitcher : ISwitcher {
   public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
     // JW Library creates several windows for dual monitor, all of them are called "JW Library".
-    // Also both have a class "ApplicationFrameWindow". They both technically consist of the same varying hierarchy of children:
+    // Also both have a class "ApplicationFrameWindow".
     //
-    // Initial (simplified) hierarchy:
+    // Both windows can be made full screen, and have the WS_EX_TOPMOST flag, supposedly set internally.
     // 
-    // + "JW Library" ApplicationFrameWindow
-    //   + "" ApplicationFrameTitleBarWindow
-    //   + "" ApplicationFrameTitleBarWindow
-    //   + "" ApplicationFrameInputSinkWindow
-    //
-    // Modified hierarchy to accommodate different views:
-    // 
-    // + "JW Library" ApplicationFrameWindow
-    //   ...(original children)
-    //   + "JW Library" Windows.UI.Core.CoreWindow
-    //     + "" XAMLWebViewHowtWindowClass
-    //       + "" Internet Explorer_Server
-    //     + "CoreInput" Windows.UI.Core.CoreComponentInputSource
-    //
-    // The only distinguishing difference seems to be that the secondary monitor window
-    // has an Extended Style with a flag of:
-    //   WS_EX_TOPMOST
-    // 
-    return info.title == "JW Library"
-          && info.className == "ApplicationFrameWindow"
-          && (info.exStyleFlags & Win32Constants.WS_EX_TOPMOST) != 0;
+    // Both windows seem to have similar hierarchy of children:
+    //                                                       Main Window           Secondary Window
+    //   "ApplicationFrameTitleBarWindow" (class)                [X]                    [ ]
+    //   "ApplicationFrameTitleBarWindow" (class)                [ ]                    [ ]
+    //                                                            |   
+    //                                                            |
+    //                                                          one of
+    //                                                         despite of
+    //                                                    full screen playback
+    if (info.title != "JW Library") return false;
+
+    Windows.Win32.Foundation.HWND hWndParent = new(info.hWnd);
+
+    var hWnd = IntPtr.Zero;
+
+    // if ((info.styleFlags & Win32Constants.WS_POPUP) != 0) {
+    
+    // FIXME: JW Library may occasionally starts in full screen mode,
+    // possibly when the screen arrangement is swapped (secondary screen to the left).
+    // In this case it is becoming harder to descriminate.
+
+    var toolbarFound = false;
+    var visibleToolbarFound = false;
+    while (true) {
+      hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), "ApplicationFrameTitleBarWindow", null as string);
+      if (hWnd != IntPtr.Zero) {
+        toolbarFound = true;
+        if (PInvoke.IsWindowVisible(new Windows.Win32.Foundation.HWND(hWnd))) {
+          visibleToolbarFound = true;
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    if (toolbarFound) return !visibleToolbarFound;
+
+
+    return false;
   }
 
   public void SwitchTo(IntPtr hWnd) {

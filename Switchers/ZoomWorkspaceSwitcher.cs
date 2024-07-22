@@ -1,29 +1,30 @@
 ﻿using Windows.Win32;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DisplayedAppSwitcher;
 public class ZoomWorkspaceSwitcher : ISwitcher {
   public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
     // Zoom creates several windows. The one that we are to bring forward is named "Zoom".
     // It has a class "ZPContentViewWndClass".
-    if (info.title != "Zoom") return false;
-    if (info.className != "ZPContentViewWndClass") return false;
 
-    // When the meeting is not running, there's two windows with the "Zoom" title,
-    // so we will further filter down to just one based on the absense of children of the
-    // ContentRightPanel child.
+    if (info.title != "Zoom Workplace") return false;
+    if (info.className != "ConfMultiTabContentWndClass") return false;
+
+    // When the meeting is not running, there's two windows with the "Zoom Workplace" title
+    // that are running behind the scenes and simply "hidden".
+    //
+    // Since we are utilizing hiding, we need something else to figure out which one of them is our window.
+    //
+    // One of the windows has a "ContentRightPanel" and the other is not.
+    // 
 
     var zeroHWND = new Windows.Win32.Foundation.HWND(IntPtr.Zero);
     var panel_hWnd = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(info.hWnd),
       zeroHWND,
       null as string, "ContentRightPanel");
-    if (panel_hWnd != IntPtr.Zero) {
-      // The one without children should be ours
-      var hWnd_ = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(panel_hWnd),
-        zeroHWND,
-        null as string, null as string);
-      if (hWnd_ == IntPtr.Zero) {
-        return true;
-      }
+    if (panel_hWnd.Value.ToString().Equals("0")) {
+      // The one without the right panel should be ours
+      return true;
     }
     return false;
     // (styleFlags & Consts.WS_VISIBLE) != 0)

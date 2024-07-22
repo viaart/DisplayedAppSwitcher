@@ -3,12 +3,18 @@ using System.Reflection;
 
 namespace DisplayedAppSwitcher;
 partial class AboutBoxForm : Form {
-  public AboutBoxForm() {
+  public AboutBoxForm(string newVersionAvailable) {
     InitializeComponent();
-    this.Text = String.Format("About {0}", AssemblyTitle);
+    this.Text = String.Format("{0} {1}", AssemblyTitle, ShortAssemblyVersion);
     this.labelProductName.Text = AssemblyProduct;
-    this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
-    this.labelCopyright.Text = AssemblyCopyright;
+    if (newVersionAvailable == "") {
+      this.labelVersion.Text = String.Format("Version {0}", ShortAssemblyVersion);
+      this.labelCopyright.Text = AssemblyCopyright;
+    } else {
+      this.labelVersion.Text = String.Format("Update {1} is available! Click the link below to download it:", ShortAssemblyVersion, newVersionAvailable);
+      this.labelCopyright.Text = AssemblyCopyright+"/releases";
+    }
+    
     this.labelCompanyName.Text = AssemblyCompany;
     this.textBoxDescription.Text = AssemblyDescription;
   }
@@ -33,11 +39,24 @@ partial class AboutBoxForm : Form {
     }
   }
 
-  public static string AssemblyVersion {
+  public static string ShortAssemblyVersion {
     get {
-      return Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "";
+      try {
+        var parsed = Version.Parse(AssemblyVersion);
+        return $"{parsed.Major}.{parsed.Minor}.{parsed.Revision}";
+      } catch {
+        return "0.0.0";
+      }
+      // return Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "";
     }
   }
+
+  public static string AssemblyVersion {
+    get {
+      return Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
+    }
+  }
+
 
   public static string AssemblyDescription {
     get {

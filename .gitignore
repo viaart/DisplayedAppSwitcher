@@ -11,3 +11,7 @@
 *.csproj.user
 
 .vs/
+
+*.exe
+*.snk
+/Setup

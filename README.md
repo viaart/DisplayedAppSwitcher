@@ -107,20 +107,24 @@ Hopefully, Zoom will eventually find another way of what to do with the secondar
 * Windows 10 (64bit) / 11 (64bit)
 
 * JW Library
-    * 13.0.146 (157716)
+    * 14.3.45 (429479)
     * 13.1.58 (170209)
+    * 13.0.146 (157716)
 
 * Zoom:
-    * 5.9.3 (3169)
-    * 5.9.7 (3931)
-    * 5.10.0 (4306)
-    * 5.10.1 (4420)
-    * 5.10.3 (4851)
-    * 5.10.4 (5035)
-    * 5.10.6 (5889)
-    * 5.10.7 (6120)
+  * Zoom Workplace
+    * 6.0.11 (39959)
+  * Original Zoom
     * 5.11.1 (6602)
-
+    * 5.10.7 (6120)
+    * 5.10.6 (5889)
+    * 5.10.4 (5035)
+    * 5.10.3 (4851)
+    * 5.10.1 (4420)
+    * 5.10.0 (4306)
+    * 5.9.7 (3931)
+    * 5.9.3 (3169)
+    
 # TODO
 
 The following things could be done to improve the tool:
@@ -135,10 +139,15 @@ The following things could be done to improve the tool:
 
 # Changelog
 
-- [x] Singleton - only one app allowed to run at a time - `v1.0.0.1`.
-- [x] Filter out third Zoom window when the meeting is not running - `v1.0.2`.
-- [x] Fix Zoom simply flashing when asked to go to the fore - `v1.0.3`.
-- [x] Change keys `F5` & `F6` shortcuts to `F9` & `F10` as `F5` is clashing with the refreshing command - `v1.0.4`.
+- [x] v1.3.0
+  - Check for updates upon wake up from hibernation or sleep
+- [x] v1.2.0
+  - Update for Zoom Workspace
+  - Check for new versions with menu and when the app starts
+- [x] v1.0.4 - Change keys `F5` & `F6` shortcuts to `F9` & `F10` as `F5` is clashing with the refreshing command.
+- [x] v1.0.3 - Fix Zoom simply flashing when asked to go to the fore.
+- [x] v1.0.2 - Filter out third Zoom window when the meeting is not running.
+- [x] v1.0.0.1 - Singleton - only one app allowed to run at a time.
 
 # Tips & Tricks
 

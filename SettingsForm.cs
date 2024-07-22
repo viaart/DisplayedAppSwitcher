@@ -1,5 +1,11 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Security.Policy;
+using System.Text.Json.Nodes;
 using Windows.Win32;
+using System;
+using System.Management;
+
 
 namespace DisplayedAppSwitcher;
 public partial class SettingsForm : Form {
@@ -9,6 +15,7 @@ public partial class SettingsForm : Form {
     switchers.Add(AppType.JWLibrary, new JWLibrarySwitcher());
     switchers.Add(AppType.Zoom, new ZoomWorkspaceSwitcher());
     InitializeTrayIcon();
+    ScheduleCheckForUpdates();
   }
 
   private readonly Dictionary<AppType, ISwitcher> switchers = new();
@@ -45,6 +52,7 @@ public partial class SettingsForm : Form {
   }
 
   protected override void OnClosing(CancelEventArgs e) {
+    UnscheduleCheckUpdates();
     HotKeys.Unresister(Handle);
     base.OnClosing(e);
   }
@@ -66,10 +74,116 @@ public partial class SettingsForm : Form {
       BringToTop(AppType.Zoom);
     };
     icon.AboutClick += (_, _) => {
-      AboutBoxForm b = new();
-      b.ShowDialog();
+      ShowAboutBox();
+    };
+    icon.CheckUpdateClick += CheckForUpdatesEvent(true);
+
+    
+  }
+
+  private ManagementEventWatcher? powerEventWatcher;
+
+  private void ScheduleCheckForUpdates() {
+    // Once when the app starts
+    _ = CheckForUpdates(false);
+    // Create a ManagementEventWatcher to listen for power management events
+    powerEventWatcher = new ManagementEventWatcher(
+        new WqlEventQuery("SELECT * FROM Win32_PowerManagementEvent"));
+    // Subscribe to the event
+    powerEventWatcher.EventArrived += PowerEventWatcher_EventArrived;
+    // Start listening for events
+    powerEventWatcher.Start();
+  }
+
+  private void PowerEventWatcher_EventArrived(object sender, EventArrivedEventArgs e) {
+    // Extract the event type
+    ushort eventType = (ushort)e.NewEvent.Properties["EventType"].Value;
+    if (eventType == 7) {
+      // EventType 7 indicates the system has resumed from sleep or hibernation
+      // Giving a few seconds for networks to join
+      // TODO: Turn this into attempts
+      wakeUpTimer = new System.Timers.Timer(10_000); 
+      wakeUpTimer.Elapsed += (_, _) => {
+        _ = CheckForUpdates(false);
+      };
+      wakeUpTimer.AutoReset = false; // Make sure the timer triggers only once
+      wakeUpTimer.Start();
+    }
+  }
+
+  private static System.Timers.Timer? wakeUpTimer;
+
+  private void UnscheduleCheckUpdates() {
+    powerEventWatcher?.Stop();
+  }
+
+  private void ShowAboutBox() {
+    AboutBoxForm b = new(newVersionAvailable);
+    b.ShowDialog();
+  }
+
+  private string newVersionAvailable = "";
+
+  private EventHandler<EventArgs> CheckForUpdatesEvent(Boolean forceBalloon) {
+    return async (_, _) => {
+      await CheckForUpdates(forceBalloon);
     };
   }
+
+  private async Task CheckForUpdates(bool forceBalloon) {
+    (bool yes, string newVersion) = await CheckForNewReleaseAsync();
+    if (yes) {
+      newVersionAvailable = newVersion;
+      ShowAboutBox();
+    } else {
+      newVersionAvailable = "";
+      if (newVersion != "" && forceBalloon) {
+        string message =
+        $"No updates found.\nYou are using the latest version, v{AboutBoxForm.ShortAssemblyVersion}, of Displayed App Switcher.";
+        const string caption = "Check for Updates";
+        _ = MessageBox.Show(message, caption,
+                                     MessageBoxButtons.OK,
+                                     MessageBoxIcon.Question);
+      }
+    }
+  }
+
+  private async
+  Task<(bool, string)>
+CheckForNewReleaseAsync() {
+    using HttpClient client = new();
+    try {
+      client.DefaultRequestHeaders.UserAgent.TryParseAdd("request"); // Set the User Agent to avoid GitHub API rejection
+      string url = $"https://api.github.com/repos/viaart/DisplayedAppSwitcher/releases/latest";
+      HttpResponseMessage response = await client.GetAsync(url);
+      response.EnsureSuccessStatusCode();
+
+      string responseBody = await response.Content.ReadAsStringAsync();
+      var release = JsonObject.Parse(responseBody);
+      if (release != null) {
+        string latestVersion = release["tag_name"].ToString();
+        if (IsNewerVersion(latestVersion, AboutBoxForm.ShortAssemblyVersion)) {
+          return (true, latestVersion);
+        } else {
+          return (false, latestVersion);
+        }
+      }
+      return (false, "");
+    } catch (HttpRequestException e) {
+      // TODO: Catch a network exception
+      return (false, "");
+    } catch (Exception e) {
+      // TODO: Catch version parsing errors
+      return (false, "");
+    }
+  }
+
+  private bool IsNewerVersion(string latestVersion, string currentVersion) {
+    Version latest = new Version(latestVersion.TrimStart('v')); // Trim 'v' if present
+    Version current = new Version(currentVersion);
+    return latest.CompareTo(current) > 0;
+  }
+
 
   private int lastSwitcherIndex = 0;
 
@@ -160,11 +274,12 @@ public class TrayIcon {
     trayMenu.Items.Add(new ToolStripSeparator());
 
     trayMenu.Items.Add(new ToolStripMenuItem("About", null, OnAboutClick));
+    trayMenu.Items.Add(new ToolStripMenuItem("Check for updates...", null, OnCheckUpdateClick));
     trayMenu.Items.Add(new ToolStripMenuItem("Exit", null, OnExitClick));
 
     trayIcon = new NotifyIcon {
       Text = "Displayed App Switcher",
-      Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath),
+      Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
       ContextMenuStrip = trayMenu,
       Visible = true,
     };
@@ -183,6 +298,7 @@ public class TrayIcon {
   public event EventHandler<EventArgs>? SwitchClick;
 
   public event EventHandler<EventArgs>? AboutClick;
+  public event EventHandler<EventArgs>? CheckUpdateClick;
 
   public event EventHandler<EventArgs>? ExitClick;
   public event EventHandler<EventArgs>? SettingsClick;
@@ -207,10 +323,14 @@ public class TrayIcon {
     AboutClick?.Invoke(this, e);
   }
 
+  private void OnCheckUpdateClick(object? sender, EventArgs e) {
+    CheckUpdateClick?.Invoke(this, e);
+  }
+
+
   private void OnSettingsClick(object? sender, EventArgs e) {
     SettingsClick?.Invoke(this, e);
   }
-
 
 }
 
@@ -219,4 +339,5 @@ public class BrintToTopEventArgs : EventArgs {
   public BrintToTopEventArgs(int index) => this.index = index;
 
 }
+
 

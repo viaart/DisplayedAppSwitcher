@@ -12,16 +12,17 @@
 
 The DisplayAppSwitcher icon sits in the system tray and can be double clicked to perform a switch. There is also a context menu with available commands that becomes visible when right clicking on the tray icon plus the keyboard shortcuts for those commands.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <SignAssembly>False</SignAssembly>
+    <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/viaart/DisplayedAppSwitcher</RepositoryUrl>
-    <Version>1.0.4</Version>
+    <Version>1.3.0</Version>
     <Copyright>https://github.com/viaart/DisplayedAppSwitcher</Copyright>
-    <Authors>viaart</Authors>
+    <Authors>Anton Veretennikov</Authors>
     <AssemblyOriginatorKeyFile>viaart_public.snk</AssemblyOriginatorKeyFile>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Platforms>AnyCPU</Platforms>
+    <PackageProjectUrl>https://github.com/viaart/DisplayedAppSwitcher</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,6 +34,7 @@ The DisplayAppSwitcher icon sits in the system tray and can be double clicked to
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -42,8 +42,8 @@ partial class AboutBoxForm : Form {
   public static string ShortAssemblyVersion {
     get {
       try {
-        var parsed = Version.Parse(AssemblyVersion);
-        return $"{parsed.Major}.{parsed.Minor}.{parsed.Revision}";
+        var parsed = new Version(AssemblyVersion);
+        return $"{parsed.Major}.{parsed.Minor}.{parsed.Build}";
       } catch {
         return "0.0.0";
       }

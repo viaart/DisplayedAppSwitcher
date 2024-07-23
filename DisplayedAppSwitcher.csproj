@@ -16,7 +16,7 @@ The DisplayAppSwitcher icon sits in the system tray and can be double clicked to
     <DelaySign>True</DelaySign>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/viaart/DisplayedAppSwitcher</RepositoryUrl>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
     <Copyright>https://github.com/viaart/DisplayedAppSwitcher</Copyright>
     <Authors>Anton Veretennikov</Authors>
     <AssemblyOriginatorKeyFile>viaart_public.snk</AssemblyOriginatorKeyFile>

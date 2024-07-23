@@ -3,7 +3,7 @@
 
 #define MyAppName "DisplayedAppSwitcher"
 #define MyAppNameWithSpaces "Displayed App Switcher"
-#define MyAppVersion "1.3.0"
+#define MyAppVersion "1.3.1"
 #define MyAppPublisher "Anton Veretennikov"
 #define MyAppURL "https://github.com/viaart/DisplayedAppSwitcher"
 #define MyAppExeName "DisplayedAppSwitcher.exe"
@@ -127,11 +127,11 @@ begin
   
   if Is_1_0_Installed <> '' then
   begin
-    if MsgBox('A previous version of Displayed App Switcher is currently installed. We will attempt to automatically remove it now after you click ''OK''.', mbConfirmation, MB_OKCANCEL) = IDOK then
+    if MsgBox('A previous version of Displayed App Switcher is currently installed. We will attempt to run its uninstaller now. Please choose ''Remove'' in the next dialog.', mbConfirmation, MB_OKCANCEL) = IDOK then
     begin
       Split := StrSplit(Is_1_0_Installed, ' ');
       U := Split[1];
-      StringChangeEx(U, '/I', '/quiet /x', True);
+      // StringChangeEx(U, '/I', '/quiet /x', True);
       Exec(Split[0], U, '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
     end;
     
@@ -139,8 +139,8 @@ begin
     
     if UninstallString <> '' then
     begin
-      MsgBox('Uninstallation of the previous version of Displayed App Switcher failed. Please uninstall the previous version manually before installing a new version.', mbError, MB_OK);
-      Result := False;
+      MsgBox('Automatic uninstallation of the previous version of Displayed App Switcher failed. Please uninstall the previous version manually before proceeding.', mbError, MB_OK);
+      Result := True;
     end
     else
     begin

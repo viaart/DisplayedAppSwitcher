@@ -139,6 +139,8 @@ The following things could be done to improve the tool:
 
 # Changelog
 
+- [x] v1.3.1
+  - Make setup show uninstall dialog of the previous version instead of a doing it quietly.
 - [x] v1.3.0
   - Check for updates upon wake up from hibernation or sleep
 - [x] v1.2.0

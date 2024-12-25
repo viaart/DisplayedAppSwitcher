@@ -102,18 +102,20 @@ I test the need for this tool as Zoom & JW Library receive their updates. So far
 Hopefully, Zoom will eventually find another way of what to do with the secondary window and fix window jumping behavior. And, perhaps JW Library will provide a more reliable way to keep itself on the top, when other applications might fight for staying on top of others. Then there will be no need for **Displayed App Switcher**.
 
 
-## Known to Work
+## Tested Versions
 
 * Windows 10 (64bit) / 11 (64bit)
 
 * JW Library
-    * 14.3.45 (429479)
+    * 15.0.398 (536532) - v1.3.2
+    * 14.3.45 (429479) - v1.3.1
     * 13.1.58 (170209)
     * 13.0.146 (157716)
 
 * Zoom:
   * Zoom Workplace
-    * 6.0.11 (39959)
+    * 6.2.7 (49583) - v1.3.2
+    * 6.0.11 (39959) - v1.3.1
   * Original Zoom
     * 5.11.1 (6602)
     * 5.10.7 (6120)
@@ -132,6 +134,7 @@ The following things could be done to improve the tool:
 - [ ] Monitor for new Zoom PID in case it crashes to restore the last state.
 - [ ] Auto Building.
 - [ ] Auto Update.
+- [x] Notification Of New Versions.
 - [ ] Custom keyboard shortcuts.
 - [ ] Different behaviors depending on JW Library / Zoom versions.
 - [ ] Turn it into a universal tool with configurations.
@@ -139,6 +142,8 @@ The following things could be done to improve the tool:
 
 # Changelog
 
+- [x] v1.3.2
+  - Implement new logic to address naming changes in JW Library.
 - [x] v1.3.1
   - Make setup show uninstall dialog of the previous version instead of a doing it quietly.
 - [x] v1.3.0

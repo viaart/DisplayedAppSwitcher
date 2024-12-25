@@ -70,8 +70,7 @@
       logoPictureBox.Margin = new Padding(7, 6, 7, 6);
       logoPictureBox.Name = "logoPictureBox";
       tableLayoutPanel.SetRowSpan(logoPictureBox, 6);
-      logoPictureBox.Size = new Size(132, 128);
-      logoPictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+      logoPictureBox.Size = new Size(132, 132);
       logoPictureBox.TabIndex = 12;
       logoPictureBox.TabStop = false;
       // 

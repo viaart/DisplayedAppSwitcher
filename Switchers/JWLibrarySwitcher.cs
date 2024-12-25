@@ -5,8 +5,11 @@ namespace DisplayedAppSwitcher;
 
 public class JWLibrarySwitcher : ISwitcher {
   public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
-    // JW Library creates several windows for dual monitor, all of them are called "JW Library".
-    // Also both have a class "ApplicationFrameWindow".
+    // JW Library creates several windows for dual monitor.
+    // Finally the second display window has a different name - "Second Display ‎- JW Library" 
+    // (with the LEFT-TO-RIGHT MARK unicode symbol inside the title).
+    //
+    // Both windows have the same class "ApplicationFrameWindow".
     //
     // Both windows can be made full screen, and have the WS_EX_TOPMOST flag, supposedly set internally.
     // 
@@ -19,36 +22,42 @@ public class JWLibrarySwitcher : ISwitcher {
     //                                                          one of
     //                                                         despite of
     //                                                    full screen playback
-    if (info.title != "JW Library") return false;
+
+
+    // Finally second display has a unique name, so we can reliably detect it without
+    // searching for any internals.
+    if (!(info.title == "Second Display ‎- JW Library")) {
+      return false;
+    }
 
     Windows.Win32.Foundation.HWND hWndParent = new(info.hWnd);
 
     var hWnd = IntPtr.Zero;
 
     // if ((info.styleFlags & Win32Constants.WS_POPUP) != 0) {
-    
+
     // FIXME: JW Library may occasionally starts in full screen mode,
     // possibly when the screen arrangement is swapped (secondary screen to the left).
-    // In this case it is becoming harder to descriminate.
+    // In this case it is becoming harder to discriminate.
 
-    var toolbarFound = false;
-    var visibleToolbarFound = false;
-    while (true) {
-      hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), "ApplicationFrameTitleBarWindow", null as string);
-      if (hWnd != IntPtr.Zero) {
-        toolbarFound = true;
-        if (PInvoke.IsWindowVisible(new Windows.Win32.Foundation.HWND(hWnd))) {
-          visibleToolbarFound = true;
-          break;
-        }
-      } else {
-        break;
-      }
-    }
-    if (toolbarFound) return !visibleToolbarFound;
+    //var toolbarFound = false;
+    //var visibleToolbarFound = false;
+    //while (true) {
+    //  hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), "ApplicationFrameTitleBarWindow", null as string);
+    //  if (hWnd != IntPtr.Zero) {
+    //    toolbarFound = true;
+    //    if (PInvoke.IsWindowVisible(new Windows.Win32.Foundation.HWND(hWnd))) {
+    //      visibleToolbarFound = true;
+    //      break;
+    //    }
+    //  } else {
+    //    break;
+    //  }
+    //}
+    
+    //if (toolbarFound) return true; // !visibleToolbarFound;
 
-
-    return false;
+    return true;
   }
 
   public void SwitchTo(IntPtr hWnd) {

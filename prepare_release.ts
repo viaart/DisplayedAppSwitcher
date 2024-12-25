@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
+import { closeSync, openSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import * as readline from 'readline';
 import { fileURLToPath } from 'url';
@@ -51,6 +51,35 @@ rl.question('Enter the new version number: ', async (newVersion: string) => {
 
   const innoSetupScriptFilePath = resolve(__dirname, 'InnoSetupScript.iss');
 
+  const waitForFileRelease = (filePath: string, interval: number = 1000, timeout: number = 60000) => {
+    return new Promise<void>((resolve, reject) => {
+      const startTime = Date.now();
+
+      const checkFile = () => {
+        try {
+          throwIfFileLocked(filePath);
+          resolve();
+        } catch (error) {
+          if (Date.now() - startTime >= timeout) {
+            reject(new Error(`Timeout waiting for file release: ${filePath}`));
+          } else {
+            setTimeout(checkFile, interval);
+          }
+        }
+      };
+
+      checkFile();
+    });
+  };
+
+  try {
+    await waitForFileRelease(innoSetupScriptFilePath);
+    console.log(`File ${innoSetupScriptFilePath} is now available.`);
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+
   try {
     const innoOutput = execSync('"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" ' + innoSetupScriptFilePath);
     console.log(`stdout: ${innoOutput.toString()}`);
@@ -59,5 +88,20 @@ rl.question('Enter the new version number: ', async (newVersion: string) => {
     throw error;
   }
 
-  
+
 });
+
+function throwIfFileLocked(filePath) {
+  try {
+    // Attempt to open the file with exclusive rights
+    const fd = openSync(filePath, 'r+'); // Read/write access
+    closeSync(fd); // Close the file descriptor
+    return false; // File is not locked
+  } catch (err) {
+    if (err.code === 'EBUSY' || err.code === 'EPERM' || err.code === 'EACCES') {
+      console.log(`File is locked: ${filePath}`);
+      throw err;
+    }
+    throw err; // Throw other unexpected errors
+  }
+}

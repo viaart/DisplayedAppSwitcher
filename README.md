@@ -183,3 +183,14 @@ Currently, this utility **minimizes** JW Library when showing the Zoom window an
 ## Build from source
 
 To build from source, clone the repository and open `*.csproj` in "Microsoft Visual Studio 2022". Community Edition is enough to compile and use this open source project.
+
+## New version release steps
+
+* Change Version Numbers:
+  * `pnpm dlx tsx .\prepare_release.ts`, enter the version number without `v`.
+    * This will:
+      * Update the version number in 3 files.
+      * Call Publish through `dotnet` which outputs to `bin\Release\net6.0-windows\publish`.
+      * Run `InnoSetupScript.iss` which outputs generated Setup to `Setup` folder.
+* Commit & push changes, tag the commit.
+* Release from the tag, upload generated Setup from `Setup` folder.

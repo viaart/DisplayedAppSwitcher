@@ -97,35 +97,47 @@ An attempt to share screen with the hidden secondary Zoom window also helps, as 
 
 ## Still needed?
 
-I test the need for this tool as Zoom & JW Library receive their updates. So far, the behavior stays the same.
+I evaluate the necessity of this tool as Zoom and JW Library receive updates. So far, the behavior remains unchanged.
 
-Hopefully, Zoom will eventually find another way of what to do with the secondary window and fix window jumping behavior. And, perhaps JW Library will provide a more reliable way to keep itself on the top, when other applications might fight for staying on top of others. Then there will be no need for **Displayed App Switcher**.
-
+Ideally, Zoom will eventually address the secondary window jumping issue, and JW Library will provide a more reliable way to stay on top when other applications compete for focus. If these improvements are made, **Displayed App Switcher** will no longer be needed.
 
 ## Tested Versions
 
-* Windows 10 (64bit) / 11 (64bit)
+### Windows
 
-* JW Library
-    * 15.0.398 (536532) - v1.3.2
-    * 14.3.45 (429479) - v1.3.1
-    * 13.1.58 (170209)
-    * 13.0.146 (157716)
+* **Windows 10 (64bit) / 11 (64bit)**
 
-* Zoom:
-  * Zoom Workplace
-    * 6.2.7 (49583) - v1.3.2
-    * 6.0.11 (39959) - v1.3.1
-  * Original Zoom
-    * 5.11.1 (6602)
-    * 5.10.7 (6120)
-    * 5.10.6 (5889)
-    * 5.10.4 (5035)
-    * 5.10.3 (4851)
-    * 5.10.1 (4420)
-    * 5.10.0 (4306)
-    * 5.9.7 (3931)
-    * 5.9.3 (3169)
+### JW Library
+
+| Version           | Displayed App Switcher |
+| ----------------- | ---------------------- |
+| 15.2.54 (588452)  | `v1.3.3`               |
+| 15.0.398 (536532) | `v1.3.2`               |
+| 14.3.45 (429479)  | `v1.3.1`               |
+| 13.1.58 (170209)  |                        |
+| 13.0.146 (157716) |                        |
+
+### Zoom Workspace
+
+| Version        | Displayed App Switcher |
+| -------------- | ---------------------- |
+| 6.3.11 (60501) | `v1.3.3`               |
+| 6.2.7 (49583)  | `v1.3.2`               |
+| 6.0.11 (39959) | `v1.3.1`               |
+
+### Original Zoom
+
+| Version       |
+| ------------- |
+| 5.11.1 (6602) |
+| 5.10.7 (6120) |
+| 5.10.6 (5889) |
+| 5.10.4 (5035) |
+| 5.10.3 (4851) |
+| 5.10.1 (4420) |
+| 5.10.0 (4306) |
+| 5.9.7 (3931)  |
+| 5.9.3 (3169)  |
     
 # TODO
 
@@ -142,6 +154,8 @@ The following things could be done to improve the tool:
 
 # Changelog
 
+- [x] v1.3.3
+  - Updated logic to discover new versions of JW Library.
 - [x] v1.3.2
   - Implement new logic to address naming changes in JW Library.
 - [x] v1.3.1
@@ -187,6 +201,7 @@ To build from source, clone the repository and open `*.csproj` in "Microsoft Vis
 ## New version release steps
 
 * Change Version Numbers:
+  * Abort running Displayed App Switcher.
   * `pnpm dlx tsx .\prepare_release.ts`, enter the version number without `v`.
     * This will:
       * Update the version number in 3 files.

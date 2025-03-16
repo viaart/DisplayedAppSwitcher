@@ -6,8 +6,6 @@ namespace DisplayedAppSwitcher;
 public class JWLibrarySwitcher : ISwitcher {
   public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
     // JW Library creates several windows for dual monitor.
-    // Finally the second display window has a different name - "Second Display ‎- JW Library" 
-    // (with the LEFT-TO-RIGHT MARK unicode symbol inside the title).
     //
     // Both windows have the same class "ApplicationFrameWindow".
     //
@@ -22,17 +20,19 @@ public class JWLibrarySwitcher : ISwitcher {
     //                                                          one of
     //                                                         despite of
     //                                                    full screen playback
-
-
-    // Finally second display has a unique name, so we can reliably detect it without
-    // searching for any internals.
-    if (!(info.title == "Second Display ‎- JW Library")) {
+    if (info.title == "Second Display ‎- JW Library") {
+      // For a few months, second display had a unique name, so we could reliably detect it without
+      // searching for any internals (with the LEFT-TO-RIGHT MARK unicode symbol inside the title).
+      return true;
+    }
+    if (!(info.title == "JW Library")) {
       return false;
     }
-
-    Windows.Win32.Foundation.HWND hWndParent = new(info.hWnd);
-
-    var hWnd = IntPtr.Zero;
+    return !HasVisibleTitleBar(info);
+    // if ((info.styleFlags & Win32Constants.WS_CAPTION) > 0 ) {
+    //   return false;
+    // }
+    // return true;
 
     // if ((info.styleFlags & Win32Constants.WS_POPUP) != 0) {
 
@@ -54,11 +54,26 @@ public class JWLibrarySwitcher : ISwitcher {
     //    break;
     //  }
     //}
-    
     //if (toolbarFound) return true; // !visibleToolbarFound;
-
-    return true;
+    //return false;
   }
+
+  private bool HasVisibleTitleBar(SwitcherWindowInfo info) {
+    Windows.Win32.Foundation.HWND hWndParent = new(info.hWnd);
+    var hWnd = IntPtr.Zero;
+    while (true) {
+      hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), "ApplicationFrameTitleBarWindow", null as string);
+      if (hWnd != IntPtr.Zero) {
+        if (PInvoke.IsWindowVisible(new Windows.Win32.Foundation.HWND(hWnd))) {
+          return true;
+        }
+      } else {
+        break;
+      }
+    }
+    return false;
+  }
+
 
   public void SwitchTo(IntPtr hWnd) {
     var h = new Windows.Win32.Foundation.HWND(hWnd);

@@ -16,34 +16,32 @@ const versionFilePath = resolve(__dirname, 'VERSION');
 const currentVersion = readFileSync(versionFilePath, 'utf8').trim();
 console.log(`Current version: ${currentVersion}`);
 
-rl.question('Enter the new version number: ', async (newVersion: string) => {
+rl.question('Enter the new (or current to overwrite) version number: ', async (newVersion: string) => {
   rl.close();
-  newVersion = newVersion.trim();
-  if (newVersion.startsWith('v')) {
-    throw new Error('Version number should not start with "v"');
-  }
+  newVersion = newVersion.trim().replace(/^v/i, '');
+  console.log(`Working on ${currentVersion == newVersion ? 'overwriting' : 'updating to'} version ${newVersion}...`);
 
   // Update VERSION file
   writeFileSync(versionFilePath, newVersion.trim(), 'utf8');
-  console.log(`Updated VERSION file with version: ${newVersion}`);
+  console.log(`* VERSION file to include ${newVersion}.`);
 
   // Update InnoSetupScript.iss file
   const innoSetupFilePath = resolve(__dirname, 'InnoSetupScript.iss');
   let innoSetupContent = readFileSync(innoSetupFilePath, 'utf8');
   innoSetupContent = innoSetupContent.replace(/#define MyAppVersion ".*"/, `#define MyAppVersion "${newVersion.trim()}"`);
   writeFileSync(innoSetupFilePath, innoSetupContent, 'utf8');
-  console.log(`Updated InnoSetupScript.iss file with version: ${newVersion}`);
+  console.log(`* InnoSetupScript.iss file modified.`);
 
   // Update DisplayedAppSwitcher.csproj file
   const csprojFilePath = resolve(__dirname, 'DisplayedAppSwitcher.csproj');
   let csprojContent = readFileSync(csprojFilePath, 'utf8');
   csprojContent = csprojContent.replace(/<Version>.*<\/Version>/, `<Version>${newVersion.trim()}</Version>`);
   writeFileSync(csprojFilePath, csprojContent, 'utf8');
-  console.log(`Updated DisplayedAppSwitcher.csproj file with version: ${newVersion}`);
+  console.log(`* DisplayedAppSwitcher.csproj file to contain ${newVersion}.`);
 
   try {
     const publishOutput = execSync('dotnet publish -c Release -o "bin\\release\\net6.0-windows\\publish"');
-    console.log(`stdout: ${publishOutput.toString()}`);
+    console.log(`* dotnet stdout:\n${publishOutput.toString()}`);
   } catch (error) {
     console.error(`Error executing dotnet publish: ${error.message}`);
     throw error;
@@ -82,12 +80,13 @@ rl.question('Enter the new version number: ', async (newVersion: string) => {
 
   try {
     const innoOutput = execSync('"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" ' + innoSetupScriptFilePath);
-    console.log(`stdout: ${innoOutput.toString()}`);
+    console.log(`* inno stdout:\n${innoOutput.toString()}`);
   } catch (error) {
     console.error(`Error executing Inno Setup compiler: ${error.message}`);
     throw error;
   }
 
+  console.log(`Release preparation complete for version ${newVersion}.`);
 
 });
 

@@ -59,5 +59,15 @@ namespace DisplayedAppSwitcher.Properties {
                 resourceCulture = value;
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap AutoPositionFeature {
+            get {
+                object obj = ResourceManager.GetObject("AutoPositionFeature", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

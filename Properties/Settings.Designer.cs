@@ -22,5 +22,29 @@ namespace DisplayedAppSwitcher.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoPositionZoomWindow {
+            get {
+                return ((bool)(this["AutoPositionZoomWindow"]));
+            }
+            set {
+                this["AutoPositionZoomWindow"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TipsLastDismissedVersion {
+            get {
+                return ((string)(this["TipsLastDismissedVersion"]));
+            }
+            set {
+                this["TipsLastDismissedVersion"] = value;
+            }
+        }
     }
 }

@@ -111,6 +111,7 @@ Ideally, Zoom will eventually address the secondary window jumping issue, and JW
 
 | Version           | Displayed App Switcher |
 | ----------------- | ---------------------- |
+| 15.6.59 (749930)  | `v1.4.0`               |
 | 15.2.54 (588452)  | `v1.3.3`               |
 | 15.0.398 (536532) | `v1.3.2`               |
 | 14.3.45 (429479)  | `v1.3.1`               |
@@ -121,6 +122,7 @@ Ideally, Zoom will eventually address the secondary window jumping issue, and JW
 
 | Version        | Displayed App Switcher |
 | -------------- | ---------------------- |
+| 6.7.2 (26346)  | `v1.4.0`               |
 | 6.3.11 (60501) | `v1.3.3`               |
 | 6.2.7 (49583)  | `v1.3.2`               |
 | 6.0.11 (39959) | `v1.3.1`               |
@@ -154,6 +156,10 @@ The following things could be done to improve the tool:
 
 # Changelog
 
+- [x] v1.4.0
+  - Add support for Zoom 6.7.2
+  - Add automatic positioning of the secondary Zoom window to the secondary monitor if it is not there.
+    ![Auto Position Feature](Resources/Screenshots/auto-position-feature.png)
 - [x] v1.3.3
   - Updated logic to discover new versions of JW Library.
 - [x] v1.3.2

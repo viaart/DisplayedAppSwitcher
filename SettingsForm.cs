@@ -11,6 +11,9 @@ namespace DisplayedAppSwitcher;
 public partial class SettingsForm : Form {
 
   public SettingsForm() {
+    // Initialize settings first
+    SettingsManager.InitializeSettings();
+    
     InitializeComponent();
     switchers.Add(AppType.JWLibrary, new JWLibrarySwitcher());
     switchers.Add(AppType.Zoom, new ZoomWorkspaceSwitcher());
@@ -45,6 +48,19 @@ public partial class SettingsForm : Form {
     ShowInTaskbar = false;
     HotKeys.Register(Handle);
     base.OnLoad(e);
+
+    // Show tips window if needed (new version or first run)
+    ShowTipsIfNeeded();
+  }
+
+  private void ShowTipsIfNeeded() {
+    if (SettingsManager.ShouldShowTips()) {
+      // Use BeginInvoke to show the form after the main form is fully loaded
+      BeginInvoke(new Action(() => {
+        using var tipsForm = new TipsForm();
+        tipsForm.ShowDialog();
+      }));
+    }
   }
 
   protected override void OnDeactivate(EventArgs e) {
@@ -273,8 +289,21 @@ public class TrayIcon {
     v.ShortcutKeyDisplayString = "F10  |  Ctrl+NumPad2";
     trayMenu.Items.Add(new ToolStripSeparator());
 
+    // Options submenu
+    var optionsMenu = new ToolStripMenuItem("Options");
+    
+    // Auto-position Zoom Window checkbox
+    var autoPositionMenuItem = new ToolStripMenuItem("Auto-position Secondary Zoom Window", null, OnAutoPositionToggleClick);
+    autoPositionMenuItem.CheckOnClick = true;
+    autoPositionMenuItem.Checked = SettingsManager.GetAutoPositionEnabled();
+    optionsMenu.DropDownItems.Add(autoPositionMenuItem);
+    
+    trayMenu.Items.Add(optionsMenu);
+    trayMenu.Items.Add(new ToolStripSeparator());
+
     trayMenu.Items.Add(new ToolStripMenuItem("About", null, OnAboutClick));
     trayMenu.Items.Add(new ToolStripMenuItem("Check for updates...", null, OnCheckUpdateClick));
+    
     trayMenu.Items.Add(new ToolStripMenuItem("Exit", null, OnExitClick));
 
     trayIcon = new NotifyIcon {
@@ -284,6 +313,9 @@ public class TrayIcon {
       Visible = true,
     };
     trayIcon.DoubleClick += OnSwitchClick;
+    
+    // Set initial tooltip with auto-positioning status
+    UpdateTrayIconTooltip();
   }
 
   public void Dispose() {
@@ -327,9 +359,42 @@ public class TrayIcon {
     CheckUpdateClick?.Invoke(this, e);
   }
 
+  private void OnAutoPositionToggleClick(object? sender, EventArgs e) {
+    try {
+      if (sender is ToolStripMenuItem menuItem) {
+        // Update the setting
+        SettingsManager.SetAutoPositionEnabled(menuItem.Checked);
+        
+        // Update tooltip to reflect the change
+        UpdateTrayIconTooltip();
+      }
+    } catch (Exception ex) {
+      MessageBox.Show($"Failed to update auto-positioning setting: {ex.Message}", 
+                      "Settings Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+  }
 
   private void OnSettingsClick(object? sender, EventArgs e) {
     SettingsClick?.Invoke(this, e);
+  }
+
+  /// <summary>
+  /// Updates the tray icon tooltip to reflect the current auto-positioning status.
+  /// </summary>
+  private void UpdateTrayIconTooltip() {
+    try {
+      bool autoPositionEnabled = SettingsManager.GetAutoPositionEnabled();
+      string baseTooltip = "Displayed App Switcher";
+      string statusTooltip = autoPositionEnabled ? 
+        $"{baseTooltip}\nAuto-positioning: Enabled" : 
+        $"{baseTooltip}\nAuto-positioning: Disabled";
+      
+      if (trayIcon != null) {
+        trayIcon.Text = statusTooltip;
+      }
+    } catch (Exception ex) {
+      System.Diagnostics.Debug.WriteLine($"Error updating tray icon tooltip: {ex.Message}");
+    }
   }
 
 }

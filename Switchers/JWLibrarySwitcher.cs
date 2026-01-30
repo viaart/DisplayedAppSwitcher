@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Windows.Win32;
+using DisplayedAppSwitcher.Services;
 
 namespace DisplayedAppSwitcher;
 
@@ -74,9 +75,9 @@ public class JWLibrarySwitcher : ISwitcher {
     return false;
   }
 
-
   public void SwitchTo(IntPtr hWnd) {
     var h = new Windows.Win32.Foundation.HWND(hWnd);
+    
     PInvoke.ShowWindow(h, Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD.SW_RESTORE);
     PInvoke.ShowWindow(h, Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD.SW_SHOW);
     PInvoke.SetForegroundWindow(h);
@@ -97,8 +98,61 @@ public class JWLibrarySwitcher : ISwitcher {
     //  )) {
     //}
   }
+  
+  /// <summary>
+  /// Detects the monitor location of the JW Library secondary window and stores it for auto-positioning.
+  /// Only updates the stored location if the window is visible and has a reasonable size (not minimized/hidden).
+  /// </summary>
+  /// <param name="hWnd">Handle to the JW Library secondary window</param>
+  private void DetectAndStoreMonitorLocation(IntPtr hWnd) {
+    System.Diagnostics.Debug.WriteLine("DetectAndStoreMonitorLocation called");
+    try {
+      var h = new Windows.Win32.Foundation.HWND(hWnd);
+
+      // Check if window is minimized using GetWindowPlacement
+      // SW_SHOWMINIMIZED = 2, SW_MINIMIZE = 6, SW_HIDE = 0
+      var placement = new Windows.Win32.UI.WindowsAndMessaging.WINDOWPLACEMENT();
+      placement.length = (uint)System.Runtime.InteropServices.Marshal.SizeOf(placement);
+      bool gotPlacement = PInvoke.GetWindowPlacement(h, ref placement);
+      System.Diagnostics.Debug.WriteLine($"GetWindowPlacement result: {gotPlacement}, showCmd: {(uint)placement.showCmd}");
+
+      if (gotPlacement) {
+        uint showCmd = (uint)placement.showCmd;
+        // Skip if minimized (2), hidden (0), or in minimize state (6)
+        if (showCmd == 0 || showCmd == 2 || showCmd == 6) {
+          System.Diagnostics.Debug.WriteLine($"JW Library window is minimized/hidden (showCmd={showCmd}) - skipping monitor detection");
+          return;
+        }
+      }
+
+      // If we already have a valid target monitor stored, don't overwrite it
+      // This prevents the second JW Library window (main window) from overwriting
+      // the correct monitor detected from the secondary display window
+      if (TargetMonitorTracker.IsTargetMonitorValid()) {
+        System.Diagnostics.Debug.WriteLine("Target monitor already set and valid - skipping");
+        return;
+      }
+
+      // Get the monitor that contains this JW Library window
+      var monitor = MonitorService.GetMonitorFromWindow(hWnd);
+
+      if (monitor != null) {
+        System.Diagnostics.Debug.WriteLine($"STORING target monitor: {monitor.Bounds}");
+        // Store this as the target monitor for Zoom auto-positioning
+        TargetMonitorTracker.SetJWLibraryTargetMonitor(monitor);
+      } else {
+        System.Diagnostics.Debug.WriteLine("Could not get monitor from JW Library window");
+      }
+    } catch (Exception ex) {
+      System.Diagnostics.Debug.WriteLine($"Error detecting JW Library monitor: {ex.Message}");
+      // Don't throw - this is not critical functionality
+    }
+  }
 
   public void OtherSwitchedBefore(IntPtr hWnd) {
+    // Detect and store the monitor location BEFORE minimizing the window
+    DetectAndStoreMonitorLocation(hWnd);
+    
     var h = new Windows.Win32.Foundation.HWND(hWnd);
     PInvoke.ShowWindow(h, Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD.SW_MINIMIZE);
   }

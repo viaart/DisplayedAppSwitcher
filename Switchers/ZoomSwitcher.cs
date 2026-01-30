@@ -2,29 +2,45 @@
 
 namespace DisplayedAppSwitcher;
 public class ZoomSwitcher : ISwitcher {
+
   public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
+    var zeroHWND = new Windows.Win32.Foundation.HWND(IntPtr.Zero);
+
+    // Case 1: Original Zoom window (non-meeting)
     // Zoom creates several windows. The one that we are to bring forward is named "Zoom".
     // It has a class "ZPContentViewWndClass".
-    if (info.title != "Zoom") return false;
-    if (info.className != "ZPContentViewWndClass") return false;
-
-    // When the meeting is not running, there's two windows with the "Zoom" title,
-    // so we will further filter down to just one based on the absense of children of the
-    // ContentRightPanel child.
-
-    var zeroHWND = new Windows.Win32.Foundation.HWND(IntPtr.Zero);
-    var panel_hWnd = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(info.hWnd),
-      zeroHWND,
-      null as string, "ContentRightPanel");
-    if (panel_hWnd != IntPtr.Zero) {
-      // The one without children should be ours
-      var hWnd_ = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(panel_hWnd),
+    if (info.title == "Zoom" && info.className == "ZPContentViewWndClass") {
+      // When the meeting is not running, there's two windows with the "Zoom" title,
+      // so we will further filter down to just one based on the absense of children of the
+      // ContentRightPanel child.
+      var panel_hWnd = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(info.hWnd),
         zeroHWND,
-        null as string, null as string);
-      if (hWnd_ == IntPtr.Zero) {
-        return true;
+        null as string, "ContentRightPanel");
+      if (panel_hWnd != IntPtr.Zero) {
+        // The one without children should be ours
+        var hWnd_ = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(panel_hWnd),
+          zeroHWND,
+          null as string, null as string);
+        if (hWnd_ == IntPtr.Zero) {
+          return true;
+        }
       }
+      return false;
     }
+
+    // Case 2: Zoom Meeting secondary window (during active meeting)
+    // This is the window without the control panel, used for screen sharing display
+    if (info.title == "Zoom Meeting" && info.className == "ConfMultiTabContentWndClass") {
+      // Recursively search for control panel by class name only (max 3 levels deep)
+      bool hasControlPanel = Win32Helpers.FindChildWindowRecursive(info.hWnd, "ZPControlPanelClass", null, 3);
+
+      bool isSecondary = !hasControlPanel;
+      System.Diagnostics.Debug.WriteLine($"ZoomSwitcher: Window 0x{info.hWnd:X} '{info.title}' hasControlPanel={hasControlPanel} isSecondary={isSecondary}");
+
+      // Secondary window does NOT have the control panel
+      return isSecondary;
+    }
+
     return false;
     // (styleFlags & Consts.WS_VISIBLE) != 0)
   }

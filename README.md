@@ -1,4 +1,4 @@
-﻿# Displayed App Switcher
+# Displayed App Switcher
 
 Appears as a system tray icon: ![](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) when run.
 
@@ -40,8 +40,27 @@ Currently the shortcuts are assigned as follows:
     * `Ctrl-NumPad 1`
     * `F9`
 * Switch to Zoom:
-    * `Ctrl-NumPad 2` 
+    * `Ctrl-NumPad 2`
     * `F10`
+
+### Options
+
+Right-click the tray icon and navigate to the **Options** submenu to access additional settings:
+
+![Auto Position Feature](Resources/Screenshots/auto-position-feature.png)
+
+* **Auto-position Secondary Zoom Window** - When enabled, automatically moves the secondary Zoom window to the secondary monitor if it appears on the wrong display. This is useful when Zoom's secondary window ends up on the primary monitor after starting or joining a meeting.
+
+#### How Auto-positioning Works
+
+Zoom's secondary window sometimes appears on the wrong monitor (typically the primary one) after starting or joining a meeting. The auto-position feature solves this by detecting where JW Library's secondary window is displayed and moving Zoom's secondary window to that same monitor.
+
+Here's what happens when you press `F10` (switch to Zoom):
+
+1. The tool finds JW Library's secondary window and detects which monitor it's on.
+2. If auto-positioning is enabled, the tool moves Zoom's secondary window to that monitor in full-screen mode.
+
+This detection happens fresh every time you press `F10`, ensuring both applications always use the same "presentation" monitor without manual intervention.
 
 Take a note of the following:
 
@@ -59,7 +78,9 @@ Make sure to turn on “Play video on a second display” in the settings in the
 
 ### Zoom
 
-In the “General” settings of Zoom, check:
+To access Zoom settings, right-click the Zoom tray icon and select "Settings", or click on the Zoom main window and look for the settings (gear) icon.
+
+In the "General" settings of Zoom, check:
 
 * “Use dual monitors"
 * "Enter full screen automatically when starting or joining a meeting"

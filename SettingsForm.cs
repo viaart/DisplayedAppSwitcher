@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Policy;
 using System.Text.Json.Nodes;
@@ -212,6 +212,12 @@ CheckForNewReleaseAsync() {
     ISwitcher switcher = switchers[appTypeIndex]; // Throws an exception if not found. We are fine with the early error discovery.
     // And remember the last one in case it's called aside of switch
     lastSwitcherIndex = (int)appTypeIndex;
+
+    // Clear target monitor at the start of each switch to Zoom
+    // This ensures fresh detection of JW Library's monitor location
+    if (appTypeIndex == AppType.Zoom) {
+      TargetMonitorTracker.ClearTargetMonitor();
+    }
 
     Windows.Win32.Foundation.HWND hWndParent = new(IntPtr.Zero);
 

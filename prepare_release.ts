@@ -1,106 +1,84 @@
-import { execSync } from 'child_process';
-import { closeSync, openSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, resolve } from 'path';
-import * as readline from 'readline';
-import { fileURLToPath } from 'url';
+#!/usr/bin/env bun
+import { $ } from "bun";
+import { resolve } from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const rootDir = import.meta.dir;
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-const versionFilePath = resolve(__dirname, 'VERSION');
-const currentVersion = readFileSync(versionFilePath, 'utf8').trim();
+const versionFilePath = resolve(rootDir, "VERSION");
+const currentVersion = (await Bun.file(versionFilePath).text()).trim();
 console.log(`Current version: ${currentVersion}`);
 
-rl.question('Enter the new (or current to overwrite) version number: ', async (newVersion: string) => {
-  rl.close();
-  newVersion = newVersion.trim().replace(/^v/i, '');
-  console.log(`Working on ${currentVersion == newVersion ? 'overwriting' : 'updating to'} version ${newVersion}...`);
-
-  // Update VERSION file
-  writeFileSync(versionFilePath, newVersion.trim(), 'utf8');
-  console.log(`* VERSION file to include ${newVersion}.`);
-
-  // Update InnoSetupScript.iss file
-  const innoSetupFilePath = resolve(__dirname, 'InnoSetupScript.iss');
-  let innoSetupContent = readFileSync(innoSetupFilePath, 'utf8');
-  innoSetupContent = innoSetupContent.replace(/#define MyAppVersion ".*"/, `#define MyAppVersion "${newVersion.trim()}"`);
-  writeFileSync(innoSetupFilePath, innoSetupContent, 'utf8');
-  console.log(`* InnoSetupScript.iss file modified.`);
-
-  // Update DisplayedAppSwitcher.csproj file
-  const csprojFilePath = resolve(__dirname, 'DisplayedAppSwitcher.csproj');
-  let csprojContent = readFileSync(csprojFilePath, 'utf8');
-  csprojContent = csprojContent.replace(/<Version>.*<\/Version>/, `<Version>${newVersion.trim()}</Version>`);
-  writeFileSync(csprojFilePath, csprojContent, 'utf8');
-  console.log(`* DisplayedAppSwitcher.csproj file to contain ${newVersion}.`);
-
-  try {
-    const publishOutput = execSync('dotnet publish -c Release -o "bin\\release\\net6.0-windows\\publish"');
-    console.log(`* dotnet stdout:\n${publishOutput.toString()}`);
-  } catch (error) {
-    console.error(`Error executing dotnet publish: ${error.message}`);
-    throw error;
-  }
-
-  const innoSetupScriptFilePath = resolve(__dirname, 'InnoSetupScript.iss');
-
-  const waitForFileRelease = (filePath: string, interval: number = 1000, timeout: number = 60000) => {
-    return new Promise<void>((resolve, reject) => {
-      const startTime = Date.now();
-
-      const checkFile = () => {
-        try {
-          throwIfFileLocked(filePath);
-          resolve();
-        } catch (error) {
-          if (Date.now() - startTime >= timeout) {
-            reject(new Error(`Timeout waiting for file release: ${filePath}`));
-          } else {
-            setTimeout(checkFile, interval);
-          }
-        }
-      };
-
-      checkFile();
-    });
-  };
-
-  try {
-    await waitForFileRelease(innoSetupScriptFilePath);
-    console.log(`File ${innoSetupScriptFilePath} is now available.`);
-  } catch (error) {
-    console.error(error.message);
-    throw error;
-  }
-
-  try {
-    const innoOutput = execSync('"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" ' + innoSetupScriptFilePath);
-    console.log(`* inno stdout:\n${innoOutput.toString()}`);
-  } catch (error) {
-    console.error(`Error executing Inno Setup compiler: ${error.message}`);
-    throw error;
-  }
-
-  console.log(`Release preparation complete for version ${newVersion}.`);
-
-});
-
-function throwIfFileLocked(filePath) {
-  try {
-    // Attempt to open the file with exclusive rights
-    const fd = openSync(filePath, 'r+'); // Read/write access
-    closeSync(fd); // Close the file descriptor
-    return false; // File is not locked
-  } catch (err) {
-    if (err.code === 'EBUSY' || err.code === 'EPERM' || err.code === 'EACCES') {
-      console.log(`File is locked: ${filePath}`);
-      throw err;
-    }
-    throw err; // Throw other unexpected errors
-  }
+const newVersionInput = prompt("Enter the new (or current to overwrite) version number:");
+if (!newVersionInput) {
+  console.error("No version provided. Exiting.");
+  process.exit(1);
 }
+
+const newVersion = newVersionInput.trim().replace(/^v/i, "");
+console.log(`Working on ${currentVersion === newVersion ? "overwriting" : "updating to"} version ${newVersion}...`);
+
+// Update VERSION file
+await Bun.write(versionFilePath, newVersion);
+console.log(`* VERSION file to include ${newVersion}.`);
+
+// Update InnoSetupScript.iss file
+const innoSetupFilePath = resolve(rootDir, "InnoSetupScript.iss");
+let innoSetupContent = await Bun.file(innoSetupFilePath).text();
+innoSetupContent = innoSetupContent.replace(/#define MyAppVersion ".*"/, `#define MyAppVersion "${newVersion}"`);
+await Bun.write(innoSetupFilePath, innoSetupContent);
+console.log(`* InnoSetupScript.iss file modified.`);
+
+// Update DisplayedAppSwitcher.csproj file
+const csprojFilePath = resolve(rootDir, "DisplayedAppSwitcher.csproj");
+let csprojContent = await Bun.file(csprojFilePath).text();
+csprojContent = csprojContent.replace(/<Version>.*<\/Version>/, `<Version>${newVersion}</Version>`);
+await Bun.write(csprojFilePath, csprojContent);
+console.log(`* DisplayedAppSwitcher.csproj file to contain ${newVersion}.`);
+
+// Run dotnet publish
+console.log("Running 'dotnet publish'...");
+const publishResult = await $`dotnet publish DisplayedAppSwitcher.csproj -c Release -o "bin\\Release\\net8.0-windows\\publish"`.cwd(rootDir).nothrow();
+if (publishResult.exitCode !== 0) {
+  console.error(`Error executing dotnet publish (exit code ${publishResult.exitCode})`);
+  console.error(publishResult.stderr.toString());
+  process.exit(1);
+}
+console.log(`* 'dotnet publish' completed.`);
+
+// Wait for file to be released
+const waitForFileRelease = async (filePath: string, interval = 1000, timeout = 60000): Promise<void> => {
+  const startTime = Date.now();
+
+  while (true) {
+    try {
+      const file = Bun.file(filePath);
+      const handle = await file.writer();
+      handle.end();
+      return;
+    } catch (error: any) {
+      if (Date.now() - startTime >= timeout) {
+        throw new Error(`Timeout waiting for file release: ${filePath}`);
+      }
+      await Bun.sleep(interval);
+    }
+  }
+};
+
+try {
+  await waitForFileRelease(innoSetupFilePath);
+} catch (error: any) {
+  console.error(error.message);
+  process.exit(1);
+}
+
+// Run Inno Setup compiler
+console.log("Running Inno Setup compiler...");
+const innoResult = await $`"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" ${innoSetupFilePath}`.nothrow();
+if (innoResult.exitCode !== 0) {
+  console.error(`Error executing Inno Setup compiler (exit code ${innoResult.exitCode})`);
+  console.error(innoResult.stderr.toString());
+  process.exit(1);
+}
+console.log(`* Inno Setup completed.`);
+
+console.log(`\nRelease preparation complete for version ${newVersion}.`);

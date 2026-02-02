@@ -3,7 +3,7 @@
 
 #define MyAppName "DisplayedAppSwitcher"
 #define MyAppNameWithSpaces "Displayed App Switcher"
-#define MyAppVersion "1.4.1"
+#define MyAppVersion "1.5.0"
 #define MyAppPublisher "Anton Veretennikov"
 #define MyAppURL "https://github.com/viaart/DisplayedAppSwitcher"
 #define MyAppExeName "DisplayedAppSwitcher.exe"
@@ -19,7 +19,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL} 
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={localappdata}\{#MyAppName}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.
 ArchitecturesAllowed=x64compatible
@@ -30,9 +30,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 LicenseFile=LICENSE
-; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+; Install for current user only (no admin required)
+PrivilegesRequired=lowest
 OutputDir=Setup
 OutputBaseFilename={#MyAppName}_{#MyAppVersion}_Setup
 VersionInfoVersion={#MyAppVersion}
@@ -53,14 +52,33 @@ var
   Success: Boolean;
 begin
   Result := '';
-  // This is a previous installer
+  // This is a very old installer (v1.0)
   InstallKey := 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{855705F5-2CB8-4063-B5DF-0A6F95C48623}';
   Success := RegQueryStringValue(HKLM, InstallKey, 'UninstallString', UninstallString);
   if Success then
   begin
-    // If the UninstallString is found, the application is installed
     Result := UninstallString;
   end;
+end;
+
+function RemoveQuotes(const S: string): string;
+begin
+  Result := S;
+  if (Length(Result) >= 2) and (Result[1] = '"') and (Result[Length(Result)] = '"') then
+    Result := Copy(Result, 2, Length(Result) - 2);
+end;
+
+function IsAdminVersionInstalled: string;
+var
+  UninstallString: string;
+begin
+  Result := '';
+  // Check for previous admin installation (installed to Program Files)
+  // The _is1 suffix is added by Inno Setup to the AppId
+  if RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{C98BD470-04FD-40E3-B9F9-CAD55E1DA291}_is1', 'UninstallString', UninstallString) then
+    Result := RemoveQuotes(UninstallString)
+  else if RegQueryStringValue(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{C98BD470-04FD-40E3-B9F9-CAD55E1DA291}_is1', 'UninstallString', UninstallString) then
+    Result := RemoveQuotes(UninstallString);
 end;
 
 // Display a message box
@@ -113,47 +131,71 @@ var
   U: String;
   Answer: Integer;
 begin
+  // Check if app is running
   while IsAppRunning(ProcessName) do
   begin
     Answer := MsgBox('Displayed App Switcher is currently running. Please choose ''Exit'' by right-clicking its icon in the system tray. Click ''OK'' to continue with the installation.', mbError, MB_OKCANCEL);
     if Answer = IDCANCEL then
     begin
-      Result := False
+      Result := False;
       Exit;
     end;
   end;
 
-  UninstallString := Is_1_0_Installed();
-  
-  if Is_1_0_Installed <> '' then
+  // Check for admin installation (v1.1+) and prompt for uninstall
+  UninstallString := IsAdminVersionInstalled();
+  if UninstallString <> '' then
   begin
-    if MsgBox('A previous version of Displayed App Switcher is currently installed. We will attempt to run its uninstaller now. Please choose ''Remove'' in the next dialog.', mbConfirmation, MB_OKCANCEL) = IDOK then
+    // First attempt: show explanatory message
+    Answer := MsgBox('A previous system-wide installation of Displayed App Switcher was detected in Program Files. This must be uninstalled before installing the new per-user version which is more maintainable.' + #13#10 + #13#10 + 'Click OK to run the uninstaller now (requires administrator privileges).', mbConfirmation, MB_OKCANCEL);
+    if Answer <> IDOK then
     begin
-      Split := StrSplit(Is_1_0_Installed, ' ');
+      Result := False;
+      Exit;
+    end;
+
+    // Retry loop
+    while True do
+    begin
+      // Run uninstaller with UAC elevation
+      ShellExec('runas', UninstallString, '', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+
+      // Re-check after uninstall attempt
+      UninstallString := IsAdminVersionInstalled();
+      if UninstallString = '' then
+        Break;  // Success, exit loop
+
+      // Still present, offer retry
+      Answer := MsgBox('The previous system-wide installation is still present.' + #13#10 + #13#10 + 'Click Retry to run the uninstaller again, or Cancel to exit setup.', mbError, MB_RETRYCANCEL);
+      if Answer = IDCANCEL then
+      begin
+        Result := False;
+        Exit;
+      end;
+      // On Retry, loop continues and runs uninstaller directly
+    end;
+  end;
+
+  // Check for very old v1.0 installation
+  UninstallString := Is_1_0_Installed();
+  if UninstallString <> '' then
+  begin
+    if MsgBox('A very old version (v1.0) of Displayed App Switcher is currently installed. We will attempt to run its uninstaller now. Please choose ''Remove'' in the next dialog.', mbConfirmation, MB_OKCANCEL) = IDOK then
+    begin
+      Split := StrSplit(UninstallString, ' ');
       U := Split[1];
-      // StringChangeEx(U, '/I', '/quiet /x', True);
       Exec(Split[0], U, '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
     end;
-    
-    UninstallString := Is_1_0_Installed();
-    
-    if UninstallString <> '' then
+
+    if Is_1_0_Installed() <> '' then
     begin
-      MsgBox('Automatic uninstallation of the previous version of Displayed App Switcher failed. Please uninstall the previous version manually before proceeding.', mbError, MB_OK);
-      Result := True;
-    end
-    else
-    begin
-      MsgBox('The previous version has been successfully uninstalled. We will now proceed with the installation of this version.', mbInformation, MB_OK);
-      Result := True;
+      MsgBox('Automatic uninstallation of the v1.0 version failed. Please uninstall it manually before proceeding.', mbError, MB_OK);
+      Result := False;
+      Exit;
     end;
-    //MsgBox('Previous version of Displayed App Switcher is currently installed. Please uninstall it manually before proceeding with the installation.', mbError, MB_OK);
-  end
-  else
-  begin
-    // Proceed with the installation if the application is not installed
-    Result := True;
   end;
+
+  Result := True;
 end;
 
 [Languages]
@@ -163,8 +205,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "bin\Release\net6.0-windows\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "bin\Release\net6.0-windows\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "bin\Release\net8.0-windows\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin\Release\net8.0-windows\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

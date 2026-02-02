@@ -1,4 +1,4 @@
-﻿using Windows.Win32;
+using Windows.Win32;
 using DisplayedAppSwitcher.Services;
 using System.Drawing;
 
@@ -82,7 +82,7 @@ public unsafe class Win32Helpers {
       if (FindChildWindowRecursive(currentChild, className, title, maxDepth - 1)) {
         return true;
       }
-      currentChild = PInvoke.FindWindowEx(parentHWND, new Windows.Win32.Foundation.HWND(currentChild), null as string, null as string);
+      currentChild = PInvoke.FindWindowEx(parentHWND, currentChild, null as string, null as string);
     }
 
     return false;
@@ -161,7 +161,7 @@ public unsafe class Win32Helpers {
       }
       
       // If already on target monitor, no need to move
-      if (currentMonitor.Handle.Value == targetMonitor.Handle.Value) {
+      if (currentMonitor.Handle == targetMonitor.Handle) {
         return true;
       }
       

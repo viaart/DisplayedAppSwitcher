@@ -9,15 +9,18 @@ This tool makes it predictable as to which of the two applications - JW Library 
   * Windows 11 (64bit)
 
 * Requirement:
-  * .NET 6.0 Runtime
+  * .NET 8.0 Runtime
 
 ## Installation
 
-* Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - the `DisplayedAppSwitcher.msi` file.
-    * If the Edge browser informs that it is not allowing to download the file from an unverified developer, right click the file in the list of downloads and choose `Keep`, `Show More`, `Keep Anyway`.
-* Install the app and ignore the Unknown Publisher warning by clicking "More info" and then "Run anyway".
+* Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - the `DisplayedAppSwitcher_<version>_Setup.exe` file.
+    * If the browser informs that it does not allow downloading the file from an unverified developer:
+      * Right click the file in the list of downloads and choose `Keep`, `Show More`, `Keep Anyway`.
+* Run the setup.
+* Ignore the Unknown Publisher warning by clicking "More info" and then "Run anyway".
+  > This warning appears because the app is not code signed yet, which is on the TODO list.
 * Run the ![](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) Displayed App Switcher either from the desktop link, or the Start menu.
-    * If `.Net 6.0 Runtime` is not installed, the prompt will show leading to the page to get the installer.
+    * If `.NET 8.0 Runtime` is not installed, a prompt will appear, leading to the page to get the installer.
         * Grab the `Run desktop apps` > `Download x64` one.
         * Install and try to restart **Displayed App Switcher**.
 * Periodically check for new versions, as Auto Updating is not yet implemented.
@@ -29,7 +32,7 @@ This tool makes it predictable as to which of the two applications - JW Library 
 
 ## Usage 
 
-The **Display App Switcher** icon ![Icon16x16](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) sits in the system tray when run. There is a context menu with available commands that becomes visible when right clicking on the tray icon.
+The **Displayed App Switcher** icon ![Icon16x16](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) sits in the system tray when run. There is a context menu with available commands that becomes visible when right clicking on the tray icon.
 
 Currently the shortcuts are assigned as follows:
 
@@ -51,40 +54,26 @@ Right-click the tray icon and navigate to the **Options** submenu to access addi
 
 * **Auto-position Secondary Zoom Window** - When enabled, automatically moves the secondary Zoom window to the secondary monitor if it appears on the wrong display. This is useful when Zoom's secondary window ends up on the primary monitor after starting or joining a meeting.
 
-#### How Auto-positioning Works
-
-Zoom's secondary window sometimes appears on the wrong monitor (typically the primary one) after starting or joining a meeting. The auto-position feature solves this by detecting where JW Library's secondary window is displayed and moving Zoom's secondary window to that same monitor.
-
-Here's what happens when you press `F10` (switch to Zoom):
-
-1. The tool finds JW Library's secondary window and detects which monitor it's on.
-2. If auto-positioning is enabled, the tool moves Zoom's secondary window to that monitor in full-screen mode.
-
-This detection happens fresh every time you press `F10`, ensuring both applications always use the same "presentation" monitor without manual intervention.
-
-Take a note of the following:
-
-* **Never minimize the main Zoom window**, otherwise the secondary Zoom window will also be restored from its hidden state when Zoom is asked to Exit Minimized Video - and this will cover the JW Library on the secondary screen. If that happened by accident, tap `F9` to return to a JW Library mode.
-* If Zoom accidentally crashes, it will restore itself, and rejoin the meeting as Host. At that moment Zoom's secondary window will take over. It's a good idea to be ready to quickly tap `F9` while this is happening to prevent a random user seen.
-* If during an attempt to share screen JW Library accidentally hides, click `F9` to bring it back. This can be done even while the Share Screen dialog is up or right after starting the share. The video doesn't start playing until the secondary window is brought back to vision.
-
-> To further improve reliability of switching, a physical device, such as Elgato "Stream Deck" can be obtained. Buttons on the deck like that can be assigned to playback keyboard shortcuts, and with the modified pictures & labels on the buttons make it even quicker to perform an action.
-
 ## Setup
 
 ### JW Library
 
-Make sure to turn on “Play video on a second display” in the settings in the JW Library app. Switching it off and back on helps to resolve some of the secondary window disappearance.
+Make sure to turn on "Play video on a second display" in the settings in the JW Library app. Switching it off and back on helps to resolve some secondary window disappearance issues.
 
 ### Zoom
 
 To access Zoom settings, right-click the Zoom tray icon and select "Settings", or click on the Zoom main window and look for the settings (gear) icon.
 
-In the "General" settings of Zoom, check:
+Under the "Meetings & webinars":
 
-* “Use dual monitors"
-* "Enter full screen automatically when starting or joining a meeting"
-* "Always show meeting controls"
+- [x] "Use dual monitors"
+- "Enter full screen automatically":
+  - [ ] Leave off if you are planning on using the Auto-Positioning feature
+  - [x] Check on if you prefer to have the secondary Zoom window go full screen automatically when joining a meeting.
+- [x] "Always show meeting controls"
+
+![Zoom Recommended Settings](Resources/Screenshots/zoom-recommended-settings.gif)
+
   
 “Use dual monitors” does not change behavior during the meeting, so it is vital to start or join with the “Use dual monitors” turned on beforehand.
 
@@ -102,11 +91,11 @@ During initial setup, other Zoom controls and windows may need to be moved to th
 
 2. Moreover, when screen sharing is done, Zoom window doesn't restore itself to the secondary screen behind the JW Library window.
 
-3. When JW Library crashes, accidentally a Zoom participant may show on the wall screens.
+3. When JW Library crashes, a Zoom participant may accidentally show on the wall screens.
 
-4. Most of the time, JW Library should be seen on the secondary monitor, but Zoom’s window tends to cover it due to some Z-sorting or window priority issues. JW Library second window may suddenly go to a minimized mode when Share Screen is initiated.
+4. Most of the time, JW Library should be seen on the secondary monitor, but Zoom's window tends to cover it due to some Z-sorting or window priority issues. JW Library's second window may suddenly go to a minimized mode when Share Screen is initiated.
 
-5. It can be cumbersome to use the Windows’s Taskbar to switch between the two apps, since there are multiple icons for both JW Library and Zoom pinned to the Taskbar. Attempts to find the right window create unnecessary pauses, or misclicks. Ideally, a well known keyboard shortcut to quickly perform the switch would help, but none of them are provided by either Zoom or JW Library.
+5. It can be cumbersome to use the Windows Taskbar to switch between the two apps, since there are multiple icons for both JW Library and Zoom pinned to the Taskbar. Attempts to find the right window create unnecessary pauses, or misclicks. Ideally, a well known keyboard shortcut to quickly perform the switch would help, but none of them are provided by either Zoom or JW Library.
 
 ## Solution Overview
 
@@ -114,7 +103,7 @@ This tool completely hides the secondary Zoom window from the system when reques
 
 An attempt to share screen with the hidden secondary Zoom window also helps, as there is nothing to move to the main screen, as otherwise happens when it is not hidden. Zoom window stays hidden and waits to be shown back. When requested to be shown, Zoom window automatically retains its full screen mode without any additional action. The tool simultaneously minimizes the secondary JW Library window to improve predictability. This tool never attempts to hide JW Library's secondary window (and in fact it does not seem to be possible).
 
-**Displayed App Switcher** is _not_ maintaining the state of the applications constantly, but instead only once during actual request. This is to avoid too much meddling into the behavior of both applications.
+**Displayed App Switcher** is _not_ maintaining the state of the applications constantly, but instead only once during an actual request. This is to avoid too much meddling into the behavior of both applications.
 
 ## Still needed?
 
@@ -162,7 +151,7 @@ Ideally, Zoom will eventually address the secondary window jumping issue, and JW
 | 5.9.7 (3931)  |
 | 5.9.3 (3169)  |
     
-# TODO
+## TODO
 
 The following things could be done to improve the tool:
 
@@ -171,43 +160,68 @@ The following things could be done to improve the tool:
 - [ ] Auto Update.
 - [x] Notification Of New Versions.
 - [ ] Custom keyboard shortcuts.
-- [ ] Different behaviors depending on JW Library / Zoom versions.
+- [x] Different behaviors depending on JW Library / Zoom versions.
 - [ ] Turn it into a universal tool with configurations.
+- [ ] Sign the installer to eliminate security warnings during download and installation.
 
 
-# Changelog
+## Changelog
 
-- [x] v1.4.0
+- v1.5.0
+  - Upgrade to .NET 8.0 (LTS)
+  - Upgrade CsWin32 to 0.3.269 (stable)
+  - Make the installer use the user AppData folder instead of Program Files to avoid UAC prompts during updates.
+- v1.4.1
+  - Fix auto-positioning to be more precise by looking for JW Library's secondary window more carefully.
+- v1.4.0
   - Add support for Zoom 6.7.2
   - Add automatic positioning of the secondary Zoom window to the secondary monitor if it is not there.
-    ![Auto Position Feature](Resources/Screenshots/auto-position-feature.png)
-- [x] v1.3.3
+- v1.3.3
   - Updated logic to discover new versions of JW Library.
-- [x] v1.3.2
+- v1.3.2
   - Implement new logic to address naming changes in JW Library.
-- [x] v1.3.1
+- v1.3.1
   - Make setup show uninstall dialog of the previous version instead of a doing it quietly.
-- [x] v1.3.0
+- v1.3.0
   - Check for updates upon wake up from hibernation or sleep
-- [x] v1.2.0
+- v1.2.0
   - Update for Zoom Workspace
   - Check for new versions with menu and when the app starts
-- [x] v1.0.4 - Change keys `F5` & `F6` shortcuts to `F9` & `F10` as `F5` is clashing with the refreshing command.
-- [x] v1.0.3 - Fix Zoom simply flashing when asked to go to the fore.
-- [x] v1.0.2 - Filter out third Zoom window when the meeting is not running.
-- [x] v1.0.0.1 - Singleton - only one app allowed to run at a time.
+- v1.0.4 - Change keys `F5` & `F6` shortcuts to `F9` & `F10` as `F5` is clashing with the refreshing command.
+- v1.0.3 - Fix Zoom simply flashing when asked to go to the fore.
+- v1.0.2 - Filter out third Zoom window when the meeting is not running.
+- v1.0.0.1 - Singleton - only one app allowed to run at a time.
 
-# Tips & Tricks
+## How Auto-positioning Works
 
-## Zoom
+Zoom's secondary window sometimes appears on the wrong monitor (typically the primary one) after starting or joining a meeting. The auto-position feature solves this by detecting where JW Library's secondary window is displayed and moving Zoom's secondary window to that same monitor.
 
-To eliminate the green border that sometimes surrounds the shared screen / window, remove corresponding checkbox under the Zoom settings > Share Screen > Advanced.
+Here's what happens when you press `F10` (switch to Zoom):
 
-![](https://user-images.githubusercontent.com/8169082/159496415-cca06725-12d1-4867-bbdb-5ddaae8a76f1.gif)
+1. The tool finds JW Library's secondary window and detects which monitor it's on.
+2. If auto-positioning is enabled, the tool moves Zoom's secondary window to that monitor in full-screen mode.
 
-## Windows
+This detection happens fresh every time you press `F10`, ensuring both applications always use the same "presentation" monitor without manual intervention.
 
-Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it visibly transitioning between the states. This animation can be disabled for all the windows in the system through the Advanced system settings:
+Take note of the following:
+
+* **Never minimize the main Zoom window**, otherwise the secondary Zoom window will also be restored from its hidden state when Zoom is asked to Exit Minimized Video - and this will cover the JW Library on the secondary screen. If that happened by accident, tap `F9` to return to a JW Library mode.
+* If Zoom accidentally crashes, it will restore itself, and rejoin the meeting as Host. At that moment Zoom's secondary window will take over. It's a good idea to be ready to quickly tap `F9` while this is happening to prevent a random user being seen.
+* If during an attempt to share screen JW Library accidentally hides, click `F9` to bring it back. This can be done even while the Share Screen dialog is up or right after starting the share. The video doesn't start playing until the secondary window is brought back to vision.
+
+> [!TIP] To further improve reliability of switching, a physical device, such as Elgato "Stream Deck" can be obtained. Buttons on such a deck can be assigned to playback keyboard shortcuts, and with modified pictures & labels on the buttons make it even quicker to perform an action.
+
+## Tips & tricks
+
+### Zoom :: Green border removal
+
+To eliminate the green border that sometimes surrounds the shared screen / window, remove the corresponding checkbox under the Zoom settings > Share Screen > Advanced.
+
+![Green Border](Resources/Screenshots/zoom-remove-green-border.gif)
+
+### Windows :: Disable window animation
+
+Currently, this utility **minimizes** JW Library when showing the Zoom window and restores it back, which makes it transition visibly between the states. This animation can be disabled for all the windows in the system through the Advanced system settings:
 
 * Start typing in Window search (Win+S): `Advanced System Settings` and select `View advanced system settings` (Control Panel) as soon as you see it.
 
@@ -229,10 +243,10 @@ To build from source, clone the repository and open `*.csproj` in "Microsoft Vis
 
 * Change Version Numbers:
   * Abort running Displayed App Switcher.
-  * `pnpm dlx tsx .\prepare_release.ts`, enter the version number without `v`.
+  * `bun prepare_release.ts`, enter the version number.
     * This will:
       * Update the version number in 3 files.
-      * Call Publish through `dotnet` which outputs to `bin\Release\net6.0-windows\publish`.
+      * Call Publish through `dotnet` which outputs to `bin\Release\net8.0-windows\publish`.
       * Run `InnoSetupScript.iss` which outputs generated Setup to `Setup` folder.
 * Commit & push changes, tag the commit.
 * Release from the tag, upload generated Setup from `Setup` folder.

@@ -1,4 +1,4 @@
-﻿using Windows.Win32;
+using Windows.Win32;
 
 namespace DisplayedAppSwitcher;
 public class ZoomSwitcher : ISwitcher {
@@ -18,7 +18,7 @@ public class ZoomSwitcher : ISwitcher {
         null as string, "ContentRightPanel");
       if (panel_hWnd != IntPtr.Zero) {
         // The one without children should be ours
-        var hWnd_ = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(panel_hWnd),
+        var hWnd_ = PInvoke.FindWindowEx(panel_hWnd,
           zeroHWND,
           null as string, null as string);
         if (hWnd_ == IntPtr.Zero) {

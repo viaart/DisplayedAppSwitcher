@@ -47,7 +47,7 @@ public static unsafe class MonitorService {
             
             try {
                 // Enumerate all monitors using Win32 API
-                PInvoke.EnumDisplayMonitors(new HDC(), null, (HMONITOR hMonitor, HDC hdcMonitor, RECT* lprcMonitor, LPARAM dwData) => {
+                PInvoke.EnumDisplayMonitors(new HDC(), (RECT?)null, (HMONITOR hMonitor, HDC hdcMonitor, RECT* lprcMonitor, LPARAM dwData) => {
                     var monitorInfo = GetMonitorInfoFromHandle(hMonitor);
                     if (monitorInfo != null) {
                         monitors.Add(monitorInfo);

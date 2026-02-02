@@ -18,7 +18,7 @@ public class ZoomWorkspaceSwitcher : ISwitcher {
       var panel_hWnd = PInvoke.FindWindowEx(new Windows.Win32.Foundation.HWND(info.hWnd),
         zeroHWND,
         null as string, "ContentRightPanel");
-      if (panel_hWnd.Value.ToString().Equals("0")) {
+      if (panel_hWnd.IsNull) {
         // The one without the right panel should be ours
         return true;
       }

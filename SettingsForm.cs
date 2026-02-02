@@ -177,7 +177,7 @@ CheckForNewReleaseAsync() {
       string responseBody = await response.Content.ReadAsStringAsync();
       var release = JsonObject.Parse(responseBody);
       if (release != null) {
-        string latestVersion = release["tag_name"].ToString();
+        string latestVersion = release["tag_name"]?.ToString() ?? "";
         if (IsNewerVersion(latestVersion, AboutBoxForm.ShortAssemblyVersion)) {
           return (true, latestVersion);
         } else {
@@ -185,10 +185,10 @@ CheckForNewReleaseAsync() {
         }
       }
       return (false, "");
-    } catch (HttpRequestException e) {
+    } catch (HttpRequestException) {
       // TODO: Catch a network exception
       return (false, "");
-    } catch (Exception e) {
+    } catch (Exception) {
       // TODO: Catch version parsing errors
       return (false, "");
     }
@@ -325,7 +325,7 @@ public class TrayIcon {
   }
 
   public void Dispose() {
-    trayIcon.ContextMenuStrip.Dispose();
+    trayIcon.ContextMenuStrip?.Dispose();
     trayIcon.ContextMenuStrip = null;
     trayIcon.Dispose();
   }

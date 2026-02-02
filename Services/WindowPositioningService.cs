@@ -51,7 +51,7 @@ public static class WindowPositioningService {
     try {
       // Check if window is already on the target monitor
       var currentMonitor = MonitorService.GetMonitorFromWindow(hWnd);
-      if (currentMonitor?.Handle.Value == targetMonitor.Handle.Value) {
+      if (currentMonitor != null && currentMonitor.Handle == targetMonitor.Handle) {
         return true;
       }
 

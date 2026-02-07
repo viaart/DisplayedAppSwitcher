@@ -2,33 +2,27 @@
 
 Appears as a system tray icon: ![](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) when run.
 
-This tool makes it predictable as to which of the two applications - JW Library or Zoom - is seen on the second monitor.
+This tool manages which app — JW Library or Zoom — appears on the second monitor. When switching to Zoom, it _moves_ (can be turned off) Zoom's secondary window to that monitor enlarging it to full screen and minimizes JW Library; switching back restores the previous state.
 
 * Supported OS:
-  * Windows 10 (64bit)
   * Windows 11 (64bit)
-
-* Requirement:
-  * .NET 8.0 Runtime
+  * Windows 10 (64bit)
+* Runtime: **.NET 8.0 (LTS)** - the runtime is embedded, so .NET does not need to be installed separately.
 
 ## Installation
 
 * Download the latest release from the [Releases](https://github.com/viaart/DisplayedAppSwitcher/releases) section - the `DisplayedAppSwitcher_<version>_Setup.exe` file.
-    * If the browser informs that it does not allow downloading the file from an unverified developer:
-      * Right click the file in the list of downloads and choose `Keep`, `Show More`, `Keep Anyway`.
-* Run the setup.
-* Ignore the Unknown Publisher warning by clicking "More info" and then "Run anyway".
-  > This warning appears because the app is not code signed yet, which is on the TODO list.
+* Run the `Setup` file and follow installation prompts.
 * Run the ![](https://user-images.githubusercontent.com/8169082/158886879-f4c15271-7a35-477d-9edc-95f6185cb5f6.png) Displayed App Switcher either from the desktop link, or the Start menu.
-    * If `.NET 8.0 Runtime` is not installed, a prompt will appear, leading to the page to get the installer.
-        * Grab the `Run desktop apps` > `Download x64` one.
-        * Install and try to restart **Displayed App Switcher**.
-* Periodically check for new versions, as Auto Updating is not yet implemented.
-* Remove this tool when it becomes unnecessary.
-
 * (Optional) Make the tray icon always visible for easy access:
   * Drag the icon from the hidden icons popup onto the system tray.
   * Or search for "Control which system tray icons appear on the taskbar" setting and toggle the switch.
+
+## Update
+
+* The tool notifies you when a new version is available.
+  * Auto-updating is coming soon.
+* Uninstall this tool when it's no longer needed.
 
 ## Usage 
 
@@ -48,11 +42,11 @@ Currently the shortcuts are assigned as follows:
 
 ### Options
 
-Right-click the tray icon and navigate to the **Options** submenu to access additional settings:
+Right-click the tray icon and navigate to the **Options** submenu to access additional setting:
 
 ![Auto Position Feature](Resources/Screenshots/auto-position-feature.png)
 
-* **Auto-position Secondary Zoom Window** - When enabled, automatically moves the secondary Zoom window to the secondary monitor if it appears on the wrong display. This is useful when Zoom's secondary window ends up on the primary monitor after starting or joining a meeting.
+* **Auto-position Secondary Zoom Window** - When enabled, automatically moves the secondary Zoom window to the secondary monitor if it appears on the wrong display. This is useful because Zoom's secondary window tends to appear on the primary monitor after starting or joining a meeting.
 
 ## Setup
 
@@ -67,6 +61,7 @@ To access Zoom settings, right-click the Zoom tray icon and select "Settings", o
 Under the "Meetings & webinars":
 
 - [x] "Use dual monitors"
+  > [!WARNING] If you don't enable dual monitors, pressing `F10` will reveal a blank window, a sign that the settings was not turned on. This tool is unnecessary if you don't use dual monitors, so make sure to turn it on.
 - "Enter full screen automatically":
   - [ ] Leave off if you are planning on using the Auto-Positioning feature
   - [x] Check on if you prefer to have the secondary Zoom window go full screen automatically when joining a meeting.
@@ -168,33 +163,36 @@ The following things could be done to improve the tool:
 ## Changelog
 
 - v1.5.0
-  - Upgrade to .NET 8.0 (LTS)
-  - Upgrade CsWin32 to 0.3.269 (stable)
-  - Make the installer use the user AppData folder instead of Program Files to avoid UAC prompts during updates.
+  - Setup is now signed and trusted by Microsoft
+  - Upgraded to .NET 8.0 — the runtime is now embedded, so .NET no longer needs to be installed separately
+  - Updated dependencies
+  - Installation moved to AppData to avoid falsely reported completed upgrades and no longer requires administrator privileges
+  - Minor Improvements
+    - Updated README with current Zoom screenshots and up-to-date instructions
 - v1.4.1
-  - Fix auto-positioning to be more precise by looking for JW Library's secondary window more carefully.
+  - Fix auto-positioning to be more precise by looking for JW Library's secondary window more carefully
 - v1.4.0
   - Add support for Zoom 6.7.2
-  - Add automatic positioning of the secondary Zoom window to the secondary monitor if it is not there.
+  - Add automatic positioning of the secondary Zoom window to the secondary monitor if it is not there
 - v1.3.3
-  - Updated logic to discover new versions of JW Library.
+  - Updated logic to discover new versions of JW Library
 - v1.3.2
-  - Implement new logic to address naming changes in JW Library.
+  - Implement new logic to address naming changes in JW Library
 - v1.3.1
-  - Make setup show uninstall dialog of the previous version instead of a doing it quietly.
+  - Make setup show uninstall dialog of the previous version instead of a doing it quietly
 - v1.3.0
   - Check for updates upon wake up from hibernation or sleep
 - v1.2.0
   - Update for Zoom Workspace
   - Check for new versions with menu and when the app starts
-- v1.0.4 - Change keys `F5` & `F6` shortcuts to `F9` & `F10` as `F5` is clashing with the refreshing command.
-- v1.0.3 - Fix Zoom simply flashing when asked to go to the fore.
-- v1.0.2 - Filter out third Zoom window when the meeting is not running.
-- v1.0.0.1 - Singleton - only one app allowed to run at a time.
+- v1.0.4 - Change keys `F5` & `F6` shortcuts to `F9` & `F10` as `F5` is clashing with the refreshing command
+- v1.0.3 - Fix Zoom simply flashing when asked to go to the fore
+- v1.0.2 - Filter out third Zoom window when the meeting is not running
+- v1.0.0.1 - Singleton - only one app allowed to run at a time
 
 ## How Auto-positioning Works
 
-Zoom's secondary window sometimes appears on the wrong monitor (typically the primary one) after starting or joining a meeting. The auto-position feature solves this by detecting where JW Library's secondary window is displayed and moving Zoom's secondary window to that same monitor.
+Zoom's secondary window almost always appears on the wrong monitor (typically the primary one) after starting or joining a meeting. The auto-position feature solves this by detecting where JW Library's secondary window is displayed and moving Zoom's secondary window to that same monitor.
 
 Here's what happens when you press `F10` (switch to Zoom):
 

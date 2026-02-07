@@ -1,2 +1,10 @@
 [tools]
 bun = "latest"
+
+[tasks.release]
+description = "Prepare a new release (build, sign, package)"
+run = "bun Build/prepare_release.ts"
+
+[tasks.verify]
+description = "Verify signatures on all release artifacts"
+run = "bun Build/verify_signing.ts"

@@ -1,8 +1,10 @@
 #!/usr/bin/env bun
 import { $ } from "bun";
 import { resolve } from "path";
+import { findSigntool } from "./paths";
 
-const rootDir = import.meta.dir;
+const buildDir = import.meta.dir;
+const rootDir = resolve(buildDir, "..");
 
 const versionFilePath = resolve(rootDir, "VERSION");
 const currentVersion = (await Bun.file(versionFilePath).text()).trim();
@@ -37,13 +39,35 @@ console.log(`* DisplayedAppSwitcher.csproj file to contain ${newVersion}.`);
 
 // Run dotnet publish
 console.log("Running 'dotnet publish'...");
-const publishResult = await $`dotnet publish DisplayedAppSwitcher.csproj -c Release -o "bin\\Release\\net8.0-windows\\publish"`.cwd(rootDir).nothrow();
+const publishResult = await $`dotnet publish DisplayedAppSwitcher.csproj -c Release -r win-x64 --self-contained -o "bin\\Release\\net8.0-windows\\publish"`.cwd(rootDir).nothrow();
 if (publishResult.exitCode !== 0) {
   console.error(`Error executing dotnet publish (exit code ${publishResult.exitCode})`);
   console.error(publishResult.stderr.toString());
   process.exit(1);
 }
 console.log(`* 'dotnet publish' completed.`);
+
+// Sign the published executable and DLL with Azure Trusted Signing
+console.log("Signing published binaries...");
+const signtoolPath = await findSigntool();
+const dlibPath = `${process.env.LOCALAPPDATA}\\Microsoft\\MicrosoftTrustedSigningClientTools\\Azure.CodeSigning.Dlib.dll`;
+const metadataPath = resolve(buildDir, "signing", "TrustedSigningMetadata.json");
+const publishDir = resolve(rootDir, "bin", "Release", "net8.0-windows", "publish");
+const filesToSign = [
+  resolve(publishDir, "DisplayedAppSwitcher.exe"),
+  resolve(publishDir, "DisplayedAppSwitcher.dll"),
+];
+// Use powershell to invoke signtool — Bun's shell misparses the /fd flag
+for (const filePath of filesToSign) {
+  const signResult = await $`powershell -Command "& '${signtoolPath}' sign /fd SHA256 /tr http://timestamp.acs.microsoft.com /td SHA256 /dlib '${dlibPath}' /dmdf '${metadataPath}' /v '${filePath}'"`.nothrow();
+  if (signResult.exitCode !== 0) {
+    console.error(`Error signing ${filePath} (exit code ${signResult.exitCode})`);
+    console.error(signResult.stderr.toString());
+    process.exit(1);
+  }
+  console.log(`* Signed: ${filePath.split("\\").pop()}`);
+}
+console.log("* All binaries signed.");
 
 // Wait for file to be released
 const waitForFileRelease = async (filePath: string, interval = 1000, timeout = 60000): Promise<void> => {
@@ -71,14 +95,32 @@ try {
   process.exit(1);
 }
 
-// Run Inno Setup compiler
+// Generate a batch wrapper for signtool — avoids quoting issues when passing to ISCC
+const signBatPath = resolve(buildDir, "prepare_release_sign.bat");
+await Bun.write(signBatPath, `@echo off\n"${signtoolPath}" sign /fd SHA256 /tr http://timestamp.acs.microsoft.com /td SHA256 /dlib "${dlibPath}" /dmdf "${metadataPath}" %1\n`);
+
+// Run Inno Setup compiler — pass sign tool via /S so we don't depend on IDE config
 console.log("Running Inno Setup compiler...");
-const innoResult = await $`"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" ${innoSetupFilePath}`.nothrow();
-if (innoResult.exitCode !== 0) {
-  console.error(`Error executing Inno Setup compiler (exit code ${innoResult.exitCode})`);
-  console.error(innoResult.stderr.toString());
+const innoProc = Bun.spawn({
+  cmd: [
+    "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe",
+    `/Strustedsigning=${signBatPath} $f`,
+    innoSetupFilePath,
+  ],
+  stdout: "inherit",
+  stderr: "inherit",
+});
+const innoExitCode = await innoProc.exited;
+if (innoExitCode !== 0) {
+  console.error(`Error executing Inno Setup compiler (exit code ${innoExitCode})`);
   process.exit(1);
 }
 console.log(`* Inno Setup completed.`);
+
+// Verify all signatures (exe, dll, and installer)
+const verifyResult = await $`bun ${resolve(buildDir, "verify_signing.ts")}`.nothrow();
+if (verifyResult.exitCode !== 0) {
+  process.exit(1);
+}
 
 console.log(`\nRelease preparation complete for version ${newVersion}.`);

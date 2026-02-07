@@ -1,0 +1,5 @@
+{
+    "Endpoint": "https://eus.codesigning.azure.net/",
+    "CodeSigningAccountName": "viaart-signing",
+    "CertificateProfileName": "viaart-public-trust"
+}

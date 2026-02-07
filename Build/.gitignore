@@ -1,0 +1,3 @@
+node_modules/
+bun.lock
+prepare_release_sign.bat

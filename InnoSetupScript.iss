@@ -40,6 +40,8 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+SignTool=trustedsigning
+SignToolRetryCount=3
 
 [Code]
 const
@@ -195,6 +197,22 @@ begin
     end;
   end;
 
+  Result := True;
+end;
+
+function InitializeUninstall: Boolean;
+var
+  Answer: Integer;
+begin
+  while IsAppRunning(ProcessName) do
+  begin
+    Answer := MsgBox('Displayed App Switcher is currently running. Please choose ''Exit'' by right-clicking its icon in the system tray. Click ''OK'' to continue with the uninstallation.', mbError, MB_OKCANCEL);
+    if Answer = IDCANCEL then
+    begin
+      Result := False;
+      Exit;
+    end;
+  end;
   Result := True;
 end;
 

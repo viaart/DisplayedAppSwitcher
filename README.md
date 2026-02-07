@@ -162,7 +162,7 @@ The following things could be done to improve the tool:
 - [ ] Custom keyboard shortcuts.
 - [x] Different behaviors depending on JW Library / Zoom versions.
 - [ ] Turn it into a universal tool with configurations.
-- [ ] Sign the installer to eliminate security warnings during download and installation.
+- [x] Sign the installer to eliminate security warnings during download and installation.
 
 
 ## Changelog
@@ -241,12 +241,16 @@ To build from source, clone the repository and open `*.csproj` in "Microsoft Vis
 
 ## New version release steps
 
-* Change Version Numbers:
-  * Abort running Displayed App Switcher.
-  * `bun prepare_release.ts`, enter the version number.
-    * This will:
-      * Update the version number in 3 files.
-      * Call Publish through `dotnet` which outputs to `bin\Release\net8.0-windows\publish`.
-      * Run `InnoSetupScript.iss` which outputs generated Setup to `Setup` folder.
+### Release
+
+* Ensure you are logged in to Azure CLI: `az login` (once per session).
+* Abort running Displayed App Switcher.
+* `mise run release`, enter the version number.
+  * This will:
+    * Update the version number in 3 files.
+    * Call Publish through `dotnet` which outputs to `bin\Release\net8.0-windows\publish`.
+    * Sign the published executable and DLL with Azure Trusted Signing.
+    * Run `InnoSetupScript.iss` which outputs generated Setup to `Setup` folder (Setup exe and uninstaller are also signed).
+    * Verify all signatures (exe, dll, and installer).
 * Commit & push changes, tag the commit.
 * Release from the tag, upload generated Setup from `Setup` folder.

@@ -147,10 +147,15 @@ public partial class SettingsForm : Form {
   }
 
   private async Task CheckForUpdates(bool forceBalloon) {
+    // Skip auto-check if user postponed updates (manual check always proceeds)
+    if (!forceBalloon && SettingsManager.IsUpdatePostponed()) {
+      return;
+    }
+
     (bool yes, string newVersion) = await CheckForNewReleaseAsync();
     if (yes) {
       newVersionAvailable = newVersion;
-      ShowAboutBox();
+      ShowUpdateForm();
     } else {
       newVersionAvailable = "";
       if (newVersion != "" && forceBalloon) {
@@ -162,6 +167,11 @@ public partial class SettingsForm : Form {
                                      MessageBoxIcon.Question);
       }
     }
+  }
+
+  private void ShowUpdateForm() {
+    using var form = new UpdateForm(newVersionAvailable, AboutBoxForm.ShortAssemblyVersion);
+    form.ShowDialog();
   }
 
   private async

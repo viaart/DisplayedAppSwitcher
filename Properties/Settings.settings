@@ -10,5 +10,8 @@
     <Setting Name="TipsLastDismissedVersion" Type="System.String" Scope="User">
       <Value Profile="(Default)"></Value>
     </Setting>
+    <Setting Name="UpdatePostponedUntil" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">0001-01-01T00:00:00</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -141,4 +141,21 @@ if (verifyResult.exitCode !== 0) {
   process.exit(1);
 }
 
+// Generate SHA256 checksum file for the installer
+const setupDir = resolve(rootDir, "Setup");
+const installerFileName = `DisplayedAppSwitcher_${newVersion}_Setup.exe`;
+const setupExePath = resolve(setupDir, installerFileName);
+const checksumFilePath = resolve(setupDir, `${installerFileName}.sha256`);
+
+console.log("Generating SHA256 checksum...");
+const setupBuffer = await Bun.file(setupExePath).arrayBuffer();
+const hashHex = Array.from(new Uint8Array(
+  await crypto.subtle.digest("SHA-256", setupBuffer)
+)).map(b => b.toString(16).padStart(2, "0")).join("");
+await Bun.write(checksumFilePath, `${hashHex}  ${installerFileName}\n`);
+console.log(`* SHA256 checksum: ${checksumFilePath.split("\\").pop()}`);
+
 console.log(`\nRelease preparation complete for version ${newVersion}.`);
+console.log(`\nRemember to upload BOTH files to the GitHub Release:`);
+console.log(`  - ${installerFileName}`);
+console.log(`  - ${installerFileName}.sha256`);

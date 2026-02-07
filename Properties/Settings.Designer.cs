@@ -46,5 +46,17 @@ namespace DisplayedAppSwitcher.Properties {
                 this["TipsLastDismissedVersion"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0001-01-01T00:00:00")]
+        public global::System.DateTime UpdatePostponedUntil {
+            get {
+                return ((global::System.DateTime)(this["UpdatePostponedUntil"]));
+            }
+            set {
+                this["UpdatePostponedUntil"] = value;
+            }
+        }
     }
 }

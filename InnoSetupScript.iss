@@ -132,16 +132,34 @@ var
   Split: TArrayOfString;
   U: String;
   Answer: Integer;
+  ButtonLabels: TArrayOfString;
 begin
-  // Check if app is running
+  // Check if app is running — offer to close it automatically or retry manually
   while IsAppRunning(ProcessName) do
   begin
-    Answer := MsgBox('Displayed App Switcher is currently running. Please choose ''Exit'' by right-clicking its icon in the system tray. Click ''OK'' to continue with the installation.', mbError, MB_OKCANCEL);
+    SetArrayLength(ButtonLabels, 3);
+    ButtonLabels[0] := 'Close Automatically';
+    ButtonLabels[1] := 'Retry';
+    ButtonLabels[2] := 'Cancel';
+    Answer := TaskDialogMsgBox('Displayed App Switcher is currently running.',
+      'You can close it automatically, or right-click the app''s icon in the system tray and choose Exit, then click Retry.' + #13#10 + #13#10 +
+      'If it cannot be closed, it may be running under a different user account.',
+      mbConfirmation, MB_YESNOCANCEL, ButtonLabels, 0);
+
     if Answer = IDCANCEL then
     begin
       Result := False;
       Exit;
     end;
+
+    if Answer = IDYES then
+    begin
+      // Attempt to terminate the process
+      Exec('taskkill', '/f /im DisplayedAppSwitcher.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      Sleep(2000);  // Wait for process and file handles to release
+    end;
+
+    // IDNO (Retry) just loops back and re-checks IsAppRunning
   end;
 
   // Check for admin installation (v1.1+) and prompt for uninstall
@@ -203,14 +221,30 @@ end;
 function InitializeUninstall: Boolean;
 var
   Answer: Integer;
+  ResultCode: Integer;
+  ButtonLabels: TArrayOfString;
 begin
   while IsAppRunning(ProcessName) do
   begin
-    Answer := MsgBox('Displayed App Switcher is currently running. Please choose ''Exit'' by right-clicking its icon in the system tray. Click ''OK'' to continue with the uninstallation.', mbError, MB_OKCANCEL);
+    SetArrayLength(ButtonLabels, 3);
+    ButtonLabels[0] := 'Close Automatically';
+    ButtonLabels[1] := 'Retry';
+    ButtonLabels[2] := 'Cancel';
+    Answer := TaskDialogMsgBox('Displayed App Switcher is currently running.',
+      'You can close it automatically, or right-click the app''s icon in the system tray and choose Exit, then click Retry.' + #13#10 + #13#10 +
+      'If it cannot be closed, it may be running under a different user account.',
+      mbConfirmation, MB_YESNOCANCEL, ButtonLabels, 0);
+
     if Answer = IDCANCEL then
     begin
       Result := False;
       Exit;
+    end;
+
+    if Answer = IDYES then
+    begin
+      Exec('taskkill', '/f /im DisplayedAppSwitcher.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      Sleep(2000);
     end;
   end;
   Result := True;

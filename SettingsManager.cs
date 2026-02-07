@@ -176,4 +176,21 @@ public static class SettingsManager {
     public static void DismissTipsForCurrentVersion() {
         SetTipsLastDismissedVersion(CurrentVersion);
     }
+
+    public static DateTime GetUpdatePostponedUntil() {
+        lock (_lockObject) {
+            return Settings.Default.UpdatePostponedUntil;
+        }
+    }
+
+    public static void SetUpdatePostponedUntil(DateTime until) {
+        lock (_lockObject) {
+            Settings.Default.UpdatePostponedUntil = until;
+            SaveSettings();
+        }
+    }
+
+    public static bool IsUpdatePostponed() {
+        return GetUpdatePostponedUntil() > DateTime.UtcNow;
+    }
 }

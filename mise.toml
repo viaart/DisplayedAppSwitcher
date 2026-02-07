@@ -5,6 +5,9 @@ bun = "latest"
 description = "Prepare a new release (build, sign, package)"
 run = "bun Build/prepare_release.ts"
 
-[tasks.verify]
+[tasks."verify:signing"]
 description = "Verify signatures on all release artifacts"
 run = "bun Build/verify_signing.ts"
+
+[tasks."verify:bundled_dotnet_version"]
+run = "pwsh -NoProfile -File Build/check_bundled_dotnet.ps1"

@@ -21,7 +21,7 @@ const filesToVerify = [
 let allValid = true;
 for (const filePath of filesToVerify) {
   const name = filePath.split("\\").pop();
-  const verifyResult = await $`powershell -Command "& '${signtoolPath}' verify /pa /v '${filePath}'"`.nothrow();
+  const verifyResult = await $`pwsh -Command "& '${signtoolPath}' verify /pa /v '${filePath}'"`.nothrow();
   if (verifyResult.exitCode !== 0) {
     console.error(`FAIL: ${name}`);
     allValid = false;

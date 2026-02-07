@@ -23,6 +23,17 @@ console.log(`Working on ${currentVersion === newVersion ? "overwriting" : "updat
 await Bun.write(versionFilePath, newVersion);
 console.log(`* VERSION file to include ${newVersion}.`);
 
+// Update LICENSE copyright year range to include current year
+const licenseFilePath = resolve(rootDir, "LICENSE");
+let licenseContent = await Bun.file(licenseFilePath).text();
+const currentYear = new Date().getFullYear().toString();
+licenseContent = licenseContent.replace(
+  /Copyright \(c\) (\d{4})-\d{4}/,
+  `Copyright (c) $1-${currentYear}`
+);
+await Bun.write(licenseFilePath, licenseContent);
+console.log(`* LICENSE copyright year range updated to include ${currentYear}.`);
+
 // Update InnoSetupScript.iss file
 const innoSetupFilePath = resolve(rootDir, "InnoSetupScript.iss");
 let innoSetupContent = await Bun.file(innoSetupFilePath).text();
@@ -36,6 +47,13 @@ let csprojContent = await Bun.file(csprojFilePath).text();
 csprojContent = csprojContent.replace(/<Version>.*<\/Version>/, `<Version>${newVersion}</Version>`);
 await Bun.write(csprojFilePath, csprojContent);
 console.log(`* DisplayedAppSwitcher.csproj file to contain ${newVersion}.`);
+
+// Update .NET SDK to get latest runtime targeting packs
+console.log("Updating .NET SDK...");
+const sdkUpdate = await $`pwsh -Command "winget install Microsoft.DotNet.SDK.8"`.nothrow();
+if (sdkUpdate.exitCode === 0) {
+  console.log("* .NET SDK updated.");
+}
 
 // Run dotnet publish
 console.log("Running 'dotnet publish'...");
@@ -57,9 +75,9 @@ const filesToSign = [
   resolve(publishDir, "DisplayedAppSwitcher.exe"),
   resolve(publishDir, "DisplayedAppSwitcher.dll"),
 ];
-// Use powershell to invoke signtool — Bun's shell misparses the /fd flag
+// Use pwsh to invoke signtool — Bun's shell misparses the /fd flag
 for (const filePath of filesToSign) {
-  const signResult = await $`powershell -Command "& '${signtoolPath}' sign /fd SHA256 /tr http://timestamp.acs.microsoft.com /td SHA256 /dlib '${dlibPath}' /dmdf '${metadataPath}' /v '${filePath}'"`.nothrow();
+  const signResult = await $`pwsh -Command "& '${signtoolPath}' sign /fd SHA256 /tr http://timestamp.acs.microsoft.com /td SHA256 /dlib '${dlibPath}' /dmdf '${metadataPath}' /v '${filePath}'"`.nothrow();
   if (signResult.exitCode !== 0) {
     console.error(`Error signing ${filePath} (exit code ${signResult.exitCode})`);
     console.error(signResult.stderr.toString());

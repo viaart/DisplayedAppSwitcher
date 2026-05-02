@@ -116,6 +116,7 @@ Ideally, Zoom will eventually address the secondary window jumping issue, and JW
 
 | Version           | Displayed App Switcher |
 | ----------------- | ---------------------- |
+| 15.7.36 (795978)  | `v1.5.1`               |
 | 15.6.59 (749930)  | `v1.4.0`               |
 | 15.2.54 (588452)  | `v1.3.3`               |
 | 15.0.398 (536532) | `v1.3.2`               |
@@ -127,6 +128,7 @@ Ideally, Zoom will eventually address the secondary window jumping issue, and JW
 
 | Version        | Displayed App Switcher |
 | -------------- | ---------------------- |
+| 7.0.2 (34412)  | `v1.5.1`               |
 | 6.7.2 (26346)  | `v1.4.0`               |
 | 6.3.11 (60501) | `v1.3.3`               |
 | 6.2.7 (49583)  | `v1.3.2`               |
@@ -162,6 +164,8 @@ The following things could be done to improve the tool:
 
 ## Changelog
 
+- v1.5.1
+  - Fix auto-positioning to resize Zoom's secondary window to fill the screen even when it is already on the correct monitor
 - v1.5.0
   - Setup is now signed and trusted by Microsoft
   - Upgraded to .NET 8.0 — the runtime is now embedded, so .NET no longer needs to be installed separately

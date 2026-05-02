@@ -119,10 +119,12 @@ public class ZoomWorkspaceSwitcher : ISwitcher {
         return;
       }
 
-      // Check if Zoom window is already correctly positioned on the target monitor
-      bool alreadyCorrect = IsWindowCorrectlyPositioned(windowRect, targetMonitor);
+      // Skip if Zoom window is already correctly positioned on the target monitor
+      if (IsWindowCorrectlyPositioned(windowRect, targetMonitor)) {
+        System.Diagnostics.Debug.WriteLine("Zoom window already correctly positioned - skipping");
+        return;
+      }
 
-      // ALWAYS reposition for now to test if repositioning works
       // Move Zoom window to the target monitor with full-screen positioning
       bool result = WindowPositioningService.MoveWindowToMonitor(hWnd, targetMonitor, true);
 

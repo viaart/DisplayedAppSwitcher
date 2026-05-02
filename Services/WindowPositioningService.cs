@@ -49,12 +49,6 @@ public static class WindowPositioningService {
     }
 
     try {
-      // Check if window is already on the target monitor
-      var currentMonitor = MonitorService.GetMonitorFromWindow(hWnd);
-      if (currentMonitor != null && currentMonitor.Handle == targetMonitor.Handle) {
-        return true;
-      }
-
       // Determine if the window should be positioned full screen
       bool shouldUseFullScreen = useFullScreen || Win32Helpers.ShouldPositionFullScreen(hWnd);
 

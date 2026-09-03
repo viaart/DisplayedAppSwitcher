@@ -26,8 +26,8 @@ namespace DisplayedAppSwitcher {
             mainPanel = new TableLayoutPanel();
             titleLabel = new Label();
             screenshotPictureBox = new PictureBox();
-            explanationLabel = new Label();
-            bottomPanel = new Panel();
+            explanationText = new RichTextBox();
+            bottomPanel = new TableLayoutPanel();
             doNotShowAgainCheckBox = new CheckBox();
             okButton = new Button();
             mainPanel.SuspendLayout();
@@ -37,19 +37,20 @@ namespace DisplayedAppSwitcher {
             //
             // mainPanel
             //
+            mainPanel.AutoScroll = true;
             mainPanel.ColumnCount = 1;
             mainPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             mainPanel.Controls.Add(titleLabel, 0, 0);
             mainPanel.Controls.Add(screenshotPictureBox, 0, 1);
-            mainPanel.Controls.Add(explanationLabel, 0, 2);
+            mainPanel.Controls.Add(explanationText, 0, 2);
             mainPanel.Controls.Add(bottomPanel, 0, 3);
             mainPanel.Dock = DockStyle.Fill;
             mainPanel.Location = new Point(15, 15);
             mainPanel.Name = "mainPanel";
             mainPanel.RowCount = 4;
             mainPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            mainPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 248F));
-            mainPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            mainPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 200F));
+            mainPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             mainPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
             mainPanel.Size = new Size(636, 420);
             mainPanel.TabIndex = 0;
@@ -63,54 +64,84 @@ namespace DisplayedAppSwitcher {
             titleLabel.Padding = new Padding(0, 0, 0, 10);
             titleLabel.Size = new Size(261, 42);
             titleLabel.TabIndex = 0;
-            titleLabel.Text = "New Feature: Auto-Positioning";
+            titleLabel.Text = "Tips";
             //
             // screenshotPictureBox
             //
-            screenshotPictureBox.BorderStyle = BorderStyle.FixedSingle;
-            screenshotPictureBox.Dock = DockStyle.Fill;
+            screenshotPictureBox.BorderStyle = BorderStyle.None;
+            screenshotPictureBox.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             screenshotPictureBox.Location = new Point(3, 45);
+            screenshotPictureBox.Margin = new Padding(3, 0, 3, 0);
             screenshotPictureBox.Name = "screenshotPictureBox";
-            screenshotPictureBox.Size = new Size(632, 240);
+            // Sized to the image's own 918x357 aspect at the 200px row height, so Zoom
+            // scales it edge to edge and has no spare box to centre it within.
+            screenshotPictureBox.Size = new Size(514, 200);
             screenshotPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
             screenshotPictureBox.TabIndex = 1;
             screenshotPictureBox.TabStop = false;
-            screenshotPictureBox.Image = Properties.Resources.AutoPositionFeature;
+            screenshotPictureBox.Image = Properties.Resources.NewFeatures;
             //
             // explanationLabel
             //
-            explanationLabel.Dock = DockStyle.Fill;
-            explanationLabel.Location = new Point(3, 264);
-            explanationLabel.Name = "explanationLabel";
-            explanationLabel.Padding = new Padding(0, 10, 0, 10);
-            explanationLabel.Size = new Size(630, 80);
-            explanationLabel.TabIndex = 2;
-            explanationLabel.Text = "The Zoom secondary window can now be automatically positioned to the same monitor where JW Library's secondary window is displayed.\r\n\r\nThis feature is enabled by default. Use the tray icon to disable it if desired.";
+            // A RichTextBox rather than a Label, because the setting names are bold while
+            // the rest of the line is not, and a Label cannot mix fonts within its text.
+            // Styled so it reads as static text: no border, no scrollbars, form
+            // background, not focusable, and an arrow cursor instead of an I beam.
+            // Content is built in TipsForm.BuildExplanation.
+            explanationText.BackColor = SystemColors.Control;
+            explanationText.BorderStyle = BorderStyle.None;
+            explanationText.Cursor = Cursors.Default;
+            explanationText.Dock = DockStyle.Fill;
+            explanationText.Location = new Point(3, 264);
+            explanationText.Margin = new Padding(3, 10, 3, 10);
+            explanationText.Name = "explanationText";
+            explanationText.ReadOnly = true;
+            // Vertical shows a scroll bar only when the text actually overflows, so it
+            // is invisible at normal scaling but stops the last lines being lost when
+            // font scaling squeezes this row.
+            explanationText.ScrollBars = RichTextBoxScrollBars.Vertical;
+            explanationText.Size = new Size(630, 80);
+            explanationText.TabIndex = 2;
+            explanationText.TabStop = false;
+            explanationText.Text = "";
             //
             // bottomPanel
             //
-            bottomPanel.Controls.Add(doNotShowAgainCheckBox);
-            bottomPanel.Controls.Add(okButton);
+            // Two columns rather than free placement. The checkbox takes whatever is
+            // left after the button has been given the width it needs, so narrowing the
+            // window can never slide the button underneath the caption.
+            bottomPanel.ColumnCount = 2;
+            bottomPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            bottomPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            bottomPanel.Controls.Add(doNotShowAgainCheckBox, 0, 0);
+            bottomPanel.Controls.Add(okButton, 1, 0);
             bottomPanel.Dock = DockStyle.Fill;
             bottomPanel.Location = new Point(3, 415);
             bottomPanel.Name = "bottomPanel";
             bottomPanel.Padding = new Padding(0, 5, 0, 0);
+            bottomPanel.RowCount = 1;
+            bottomPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             bottomPanel.Size = new Size(630, 45);
             bottomPanel.TabIndex = 3;
             //
             // doNotShowAgainCheckBox
             //
+            // Sized to its own text and left in its own column, so the clickable area
+            // matches the caption rather than stretching towards the button.
             doNotShowAgainCheckBox.AutoSize = true;
+            doNotShowAgainCheckBox.Anchor = AnchorStyles.Left;
             doNotShowAgainCheckBox.Location = new Point(0, 12);
             doNotShowAgainCheckBox.Name = "doNotShowAgainCheckBox";
             doNotShowAgainCheckBox.Size = new Size(165, 24);
             doNotShowAgainCheckBox.TabIndex = 0;
-            doNotShowAgainCheckBox.Text = "Do not show again";
+            doNotShowAgainCheckBox.TextAlign = ContentAlignment.MiddleLeft;
+            doNotShowAgainCheckBox.Text = "Do not show again (always available from About... > Tips)";
             doNotShowAgainCheckBox.UseVisualStyleBackColor = true;
             //
             // okButton
             //
             okButton.Anchor = AnchorStyles.Right;
+            okButton.Margin = new Padding(9, 3, 0, 3);
             okButton.Location = new Point(530, 5);
             okButton.Name = "okButton";
             okButton.Size = new Size(100, 35);
@@ -124,9 +155,15 @@ namespace DisplayedAppSwitcher {
             AcceptButton = okButton;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(666, 450);
+            ClientSize = new Size(666, 620);
             Controls.Add(mainPanel);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
+            // Sizable rather than FixedDialog, so the window can be made smaller than the
+            // content needs. The explanation then scrolls instead of losing its last lines.
+            FormBorderStyle = FormBorderStyle.Sizable;
+            // Chosen so the explanation keeps a readable height at the smallest size.
+            // The picture and button rows are fixed, so everything taken off the window
+            // comes out of the explanation: at 420 design units it collapses to one line.
+            MinimumSize = new Size(560, 560);
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             MaximizeBox = false;
             MinimizeBox = false;
@@ -148,8 +185,8 @@ namespace DisplayedAppSwitcher {
         private TableLayoutPanel mainPanel;
         private Label titleLabel;
         private PictureBox screenshotPictureBox;
-        private Label explanationLabel;
-        private Panel bottomPanel;
+        private RichTextBox explanationText;
+        private TableLayoutPanel bottomPanel;
         private CheckBox doNotShowAgainCheckBox;
         private Button okButton;
     }

@@ -42,11 +42,12 @@ Currently the shortcuts are assigned as follows:
 
 ### Options
 
-Right-click the tray icon and navigate to the **Options** submenu to access additional setting:
+Right-click the tray icon and navigate to the **Options** submenu to access additional settings:
 
-![Auto Position Feature](Resources/Screenshots/auto-position-feature.png)
+![Options submenu](Resources/Screenshots/new-features.png)
 
 * **Auto-position Secondary Zoom Window** - When enabled, automatically moves the secondary Zoom window to the secondary monitor if it appears on the wrong display. This is useful because Zoom's secondary window tends to appear on the primary monitor after starting or joining a meeting.
+* **Auto-hide New Secondary Zoom Window** - When enabled, hides the secondary Zoom window whenever a new one appears, such as when a meeting starts, after a reconnect, or when Zoom restarts. A window you bring up yourself with `F10` stays up. A small notification confirms the window was hidden.
 
 ## Setup
 
@@ -100,6 +101,8 @@ An attempt to share screen with the hidden secondary Zoom window also helps, as 
 
 **Displayed App Switcher** is _not_ maintaining the state of the applications constantly, but instead only once during an actual request. This is to avoid too much meddling into the behavior of both applications.
 
+The one exception is the optional **Auto-hide New Secondary Zoom Window** feature. It checks about twice a second whether a secondary Zoom window has newly appeared, and if one has, it performs a single switch, the same one `F9` performs. It never acts twice on the same window, so a window you bring up yourself is left alone.
+
 ## Still needed?
 
 I evaluate the necessity of this tool as Zoom and JW Library receive updates. So far, the behavior remains unchanged.
@@ -116,6 +119,7 @@ Ideally, Zoom will eventually address the secondary window jumping issue, and JW
 
 | Version           | Displayed App Switcher |
 | ----------------- | ---------------------- |
+| 15.9.36 (893824)  | `v1.6.0`               |
 | 15.7.36 (795978)  | `v1.5.1`               |
 | 15.6.59 (749930)  | `v1.4.0`               |
 | 15.2.54 (588452)  | `v1.3.3`               |
@@ -128,42 +132,34 @@ Ideally, Zoom will eventually address the secondary window jumping issue, and JW
 
 | Version        | Displayed App Switcher |
 | -------------- | ---------------------- |
+| 7.1.8 (46825)  | `v1.6.0`               |
 | 7.0.2 (34412)  | `v1.5.1`               |
 | 6.7.2 (26346)  | `v1.4.0`               |
 | 6.3.11 (60501) | `v1.3.3`               |
 | 6.2.7 (49583)  | `v1.3.2`               |
 | 6.0.11 (39959) | `v1.3.1`               |
 
-### Original Zoom
-
-| Version       |
-| ------------- |
-| 5.11.1 (6602) |
-| 5.10.7 (6120) |
-| 5.10.6 (5889) |
-| 5.10.4 (5035) |
-| 5.10.3 (4851) |
-| 5.10.1 (4420) |
-| 5.10.0 (4306) |
-| 5.9.7 (3931)  |
-| 5.9.3 (3169)  |
-    
 ## TODO
 
 The following things could be done to improve the tool:
 
-- [ ] Monitor for new Zoom PID in case it crashes to restore the last state.
+- [X] Monitor for new Zoom PID in case it crashes to restore the last state (instead implemented as Auto-hide New Secondary Zoom Window as the biggest of the bad things that might ever happen).
 - [ ] Auto Building.
-- [ ] Auto Update.
+- [x] Auto Update.
 - [x] Notification Of New Versions.
 - [ ] Custom keyboard shortcuts.
 - [x] Different behaviors depending on JW Library / Zoom versions.
 - [ ] Turn it into a universal tool with configurations.
 - [x] Sign the installer to eliminate security warnings during download and installation.
 
-
 ## Changelog
 
+- v1.6.0
+  - Add automatic hiding of the secondary Zoom window whenever a new one appears, such as when a meeting starts, after a reconnect, or when Zoom restarts. JW Library is brought back at the same time, exactly as tapping `F9` does
+  - A window brought up with `F10` is left alone, so the feature never competes with switching by hand
+  - Show a brief notification when the secondary Zoom window has been hidden automatically, on a monitor that is not the shared one
+  - Tips window is now reachable at any time from `About... > Tips`, and its "Do not show again" checkbox can be unticked again
+  - Tips window now reappears only when its content changes, instead of after every release
 - v1.5.1
   - Fix auto-positioning to resize Zoom's secondary window to fill the screen even when it is already on the correct monitor
 - v1.5.0
@@ -208,8 +204,23 @@ This detection happens fresh every time you press `F10`, ensuring both applicati
 Take note of the following:
 
 * **Never minimize the main Zoom window**, otherwise the secondary Zoom window will also be restored from its hidden state when Zoom is asked to Exit Minimized Video - and this will cover the JW Library on the secondary screen. If that happened by accident, tap `F9` to return to a JW Library mode.
-* If Zoom accidentally crashes, it will restore itself, and rejoin the meeting as Host. At that moment Zoom's secondary window will take over. It's a good idea to be ready to quickly tap `F9` while this is happening to prevent a random user being seen.
+* If Zoom accidentally crashes, it will restore itself, and rejoin the meeting as Host. At that moment Zoom's secondary window will take over. The **Auto-hide New Secondary Zoom Window** option handles this for you. With it switched off, be ready to quickly tap `F9` while this is happening to prevent a random user being seen.
 * If during an attempt to share screen JW Library accidentally hides, click `F9` to bring it back. This can be done even while the Share Screen dialog is up or right after starting the share. The video doesn't start playing until the secondary window is brought back to vision.
+
+## How Auto-hiding Works
+
+Zoom does not keep one long-lived secondary window. It destroys and recreates its meeting windows every time a meeting starts, every time the connection drops and recovers, and every time Zoom restarts after a crash. Each rebuild puts the secondary window back on screen, where the audience can see it until someone taps `F9`.
+
+The auto-hide feature watches for this. Roughly twice a second it looks for a secondary Zoom meeting window that is visible and that it has not already handled. When it finds one, it performs exactly the same switch as pressing `F9`, then shows a short notification.
+
+Running the full switch matters. Pressing `F10` to move to Zoom minimizes JW Library's secondary window, so simply hiding the Zoom window would leave the shared monitor showing the desktop. Instead the tool hides Zoom's secondary window and brings JW Library's secondary window back at the same time, exactly as `F9` does.
+
+Two more details are worth knowing:
+
+1. The tool remembers the window it handled. When you press `F10` to bring Zoom forward, that is the same window, so it is left alone. The feature never fights your own switching.
+2. Only genuine meeting windows are touched. While Zoom is starting a meeting there is a brief moment where its two windows cannot yet be told apart, and acting during it would hide the Zoom controls as well. The tool waits for that moment to pass.
+
+The notification never appears on the monitor that shows JW Library's secondary window, since that is the monitor being shared.
 
 > [!TIP] To further improve reliability of switching, a physical device, such as Elgato "Stream Deck" can be obtained. Buttons on such a deck can be assigned to playback keyboard shortcuts, and with modified pictures & labels on the buttons make it even quicker to perform an action.
 

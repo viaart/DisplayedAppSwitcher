@@ -1,3 +1,4 @@
+using DisplayedAppSwitcher.Services;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Policy;
@@ -18,6 +19,7 @@ public partial class SettingsForm : Form {
     switchers.Add(AppType.JWLibrary, new JWLibrarySwitcher());
     switchers.Add(AppType.Zoom, new ZoomWorkspaceSwitcher());
     InitializeTrayIcon();
+    StartZoomSecondaryWindowWatcher();
     ScheduleCheckForUpdates();
   }
 
@@ -69,6 +71,8 @@ public partial class SettingsForm : Form {
 
   protected override void OnClosing(CancelEventArgs e) {
     UnscheduleCheckUpdates();
+    zoomSecondaryWindowWatcher?.Dispose();
+    zoomSecondaryWindowWatcher = null;
     HotKeys.Unresister(Handle);
     base.OnClosing(e);
   }
@@ -93,8 +97,29 @@ public partial class SettingsForm : Form {
       ShowAboutBox();
     };
     icon.CheckUpdateClick += CheckForUpdatesEvent(true);
+    icon.AutoHideEnabled += (_, _) => {
+      // Leave a window the user is currently looking at alone.
+      zoomSecondaryWindowWatcher?.SeedFromCurrentState();
+    };
+  }
 
-    
+  private ZoomSecondaryWindowWatcher? zoomSecondaryWindowWatcher;
+
+  private void StartZoomSecondaryWindowWatcher() {
+    zoomSecondaryWindowWatcher = new ZoomSecondaryWindowWatcher();
+    zoomSecondaryWindowWatcher.NewSecondaryWindowDetected += (_, _) => {
+      // Run the same switch F9 performs. Hiding the Zoom window alone is not
+      // enough: a previous switch to Zoom left the JW Library secondary window
+      // minimized, so it has to be restored at the same time or the shared
+      // monitor is left showing the desktop.
+      BringToTop(AppType.JWLibrary);
+
+      AutoHideNotificationForm.ShowNotification(
+        "Zoom secondary window has been automatically"
+        + "\r\nhidden by Displayed App Switcher."
+        + "\r\nTip: Tap F10 to bring it back.", 5_000);
+    };
+    zoomSecondaryWindowWatcher.Start();
   }
 
   private ManagementEventWatcher? powerEventWatcher;
@@ -278,6 +303,16 @@ CheckForNewReleaseAsync() {
       }
     }
 
+    // This switch has just put the Zoom windows into the state the user asked for,
+    // so whatever is visible now was shown deliberately and must not be treated as
+    // a window that appeared on its own. Without this, a secondary window that was
+    // already hidden when the application started would be hidden again a moment
+    // after the first switch to Zoom, because the watcher had never seen it before.
+    //
+    // Safe to call for a switch to either application. After a switch to JW Library
+    // the Zoom window is hidden, so nothing is remembered, and a window Zoom brings
+    // back by itself is still detected.
+    zoomSecondaryWindowWatcher?.SeedFromCurrentState();
   }
 }
 
@@ -313,11 +348,18 @@ public class TrayIcon {
     autoPositionMenuItem.CheckOnClick = true;
     autoPositionMenuItem.Checked = SettingsManager.GetAutoPositionEnabled();
     optionsMenu.DropDownItems.Add(autoPositionMenuItem);
-    
+
+    // Auto-hide new secondary Zoom windows checkbox
+    var autoHideMenuItem = new ToolStripMenuItem("Auto-hide New Secondary Zoom Window", null, OnAutoHideToggleClick);
+    autoHideMenuItem.CheckOnClick = true;
+    autoHideMenuItem.Checked = SettingsManager.GetAutoHideZoomSecondaryWindowEnabled();
+    autoHideMenuItem.ToolTipText = "Hides a new secondary Zoom window as soon as it appears.";
+    optionsMenu.DropDownItems.Add(autoHideMenuItem);
+
     trayMenu.Items.Add(optionsMenu);
     trayMenu.Items.Add(new ToolStripSeparator());
 
-    trayMenu.Items.Add(new ToolStripMenuItem("About", null, OnAboutClick));
+    trayMenu.Items.Add(new ToolStripMenuItem("About...", null, OnAboutClick));
     trayMenu.Items.Add(new ToolStripMenuItem("Check for updates...", null, OnCheckUpdateClick));
     
     trayMenu.Items.Add(new ToolStripMenuItem("Exit", null, OnExitClick));
@@ -350,6 +392,12 @@ public class TrayIcon {
 
   public event EventHandler<EventArgs>? ExitClick;
   public event EventHandler<EventArgs>? SettingsClick;
+
+  /// <summary>
+  /// Raised when the user switches auto-hiding on, so the watcher can treat a
+  /// currently visible secondary window as already handled.
+  /// </summary>
+  public event EventHandler<EventArgs>? AutoHideEnabled;
 
   private void OnBringOneToTopClick(object? sender, EventArgs e) {
     BringOneToTopClick?.Invoke(this, e);
@@ -390,6 +438,23 @@ public class TrayIcon {
     }
   }
 
+  private void OnAutoHideToggleClick(object? sender, EventArgs e) {
+    try {
+      if (sender is ToolStripMenuItem menuItem) {
+        SettingsManager.SetAutoHideZoomSecondaryWindowEnabled(menuItem.Checked);
+
+        if (menuItem.Checked) {
+          AutoHideEnabled?.Invoke(this, EventArgs.Empty);
+        }
+
+        UpdateTrayIconTooltip();
+      }
+    } catch (Exception ex) {
+      MessageBox.Show($"Failed to update auto-hide setting: {ex.Message}",
+                      "Settings Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+  }
+
   private void OnSettingsClick(object? sender, EventArgs e) {
     SettingsClick?.Invoke(this, e);
   }
@@ -400,11 +465,12 @@ public class TrayIcon {
   private void UpdateTrayIconTooltip() {
     try {
       bool autoPositionEnabled = SettingsManager.GetAutoPositionEnabled();
+      bool autoHideEnabled = SettingsManager.GetAutoHideZoomSecondaryWindowEnabled();
       string baseTooltip = "Displayed App Switcher";
-      string statusTooltip = autoPositionEnabled ? 
-        $"{baseTooltip}\nAuto-positioning: Enabled" : 
-        $"{baseTooltip}\nAuto-positioning: Disabled";
-      
+      string statusTooltip =
+        $"{baseTooltip}\nAuto-positioning: {(autoPositionEnabled ? "Enabled" : "Disabled")}"
+        + $"\nAuto-hiding: {(autoHideEnabled ? "Enabled" : "Disabled")}";
+
       if (trayIcon != null) {
         trayIcon.Text = statusTooltip;
       }

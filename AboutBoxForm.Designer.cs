@@ -30,8 +30,11 @@
       labelCopyright = new LinkLabel();
       labelCompanyName = new Label();
       textBoxDescription = new TextBox();
+      buttonPanel = new FlowLayoutPanel();
       okButton = new Button();
+      tipsButton = new Button();
       tableLayoutPanel.SuspendLayout();
+      buttonPanel.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)logoPictureBox).BeginInit();
       SuspendLayout();
       // 
@@ -46,7 +49,7 @@
       tableLayoutPanel.Controls.Add(labelCopyright, 1, 2);
       tableLayoutPanel.Controls.Add(labelCompanyName, 1, 3);
       tableLayoutPanel.Controls.Add(textBoxDescription, 1, 4);
-      tableLayoutPanel.Controls.Add(okButton, 1, 5);
+      tableLayoutPanel.Controls.Add(buttonPanel, 1, 5);
       tableLayoutPanel.Dock = DockStyle.Fill;
       tableLayoutPanel.Location = new Point(17, 20);
       tableLayoutPanel.Margin = new Padding(7, 6, 7, 6);
@@ -140,20 +143,43 @@
       textBoxDescription.TabIndex = 23;
       textBoxDescription.TabStop = false;
       textBoxDescription.Text = "Description";
-      // 
+      //
+      // buttonPanel
+      //
+      // Hosts the dialog buttons so they sit side by side. Flowing right to left
+      // keeps OK hard against the right edge, where it was before Tips was added.
+      buttonPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+      buttonPanel.AutoSize = true;
+      buttonPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+      buttonPanel.Controls.Add(okButton);
+      buttonPanel.Controls.Add(tipsButton);
+      buttonPanel.FlowDirection = FlowDirection.RightToLeft;
+      buttonPanel.Margin = new Padding(0);
+      buttonPanel.Name = "buttonPanel";
+      buttonPanel.TabIndex = 24;
+      //
       // okButton
-      // 
-      okButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+      //
       okButton.DialogResult = DialogResult.Cancel;
-      okButton.Location = new Point(763, 549);
       okButton.Margin = new Padding(7, 6, 7, 6);
       okButton.Name = "okButton";
       okButton.Size = new Size(151, 48);
       okButton.TabIndex = 24;
       okButton.Text = "&OK";
-      // 
+      okButton.UseVisualStyleBackColor = true;
+      //
+      // tipsButton
+      //
+      tipsButton.Margin = new Padding(7, 6, 7, 6);
+      tipsButton.Name = "tipsButton";
+      tipsButton.Size = new Size(151, 48);
+      tipsButton.TabIndex = 25;
+      tipsButton.Text = "&Tips";
+      tipsButton.UseVisualStyleBackColor = true;
+      tipsButton.Click += tipsButton_Click;
+      //
       // AboutBoxForm
-      // 
+      //
       AcceptButton = okButton;
       AutoScaleDimensions = new SizeF(12F, 30F);
       AutoScaleMode = AutoScaleMode.Font;
@@ -171,6 +197,8 @@
       Text = "About";
       tableLayoutPanel.ResumeLayout(false);
       tableLayoutPanel.PerformLayout();
+      buttonPanel.ResumeLayout(false);
+      buttonPanel.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)logoPictureBox).EndInit();
       ResumeLayout(false);
     }
@@ -183,7 +211,9 @@
     private System.Windows.Forms.Label labelVersion;
     private System.Windows.Forms.Label labelCompanyName;
     private System.Windows.Forms.TextBox textBoxDescription;
+    private System.Windows.Forms.FlowLayoutPanel buttonPanel;
     private System.Windows.Forms.Button okButton;
+    private System.Windows.Forms.Button tipsButton;
     private LinkLabel labelCopyright;
   }
 }

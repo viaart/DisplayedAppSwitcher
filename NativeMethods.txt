@@ -10,6 +10,7 @@ GetClassName
 RegisterHotKey
 UnregisterHotKey
 IsWindowVisible
+IsWindow
 
 EnumDisplayMonitors
 GetMonitorInfo

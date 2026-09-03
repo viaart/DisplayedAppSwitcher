@@ -99,6 +99,15 @@ partial class AboutBoxForm : Form {
   }
   #endregion
 
+  /// <summary>
+  /// Reopens the Tips window on demand, so the tips stay reachable after the user has
+  /// ticked "Do not show again".
+  /// </summary>
+  private void tipsButton_Click(object? sender, EventArgs e) {
+    using var tipsForm = new TipsForm();
+    tipsForm.ShowDialog(this);
+  }
+
   private void labelCopyright_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
     try {
       Process.Start(new ProcessStartInfo(((LinkLabel)sender).Text) { UseShellExecute = true });

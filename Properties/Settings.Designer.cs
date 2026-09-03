@@ -37,13 +37,25 @@ namespace DisplayedAppSwitcher.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string TipsLastDismissedVersion {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoHideZoomSecondaryWindow {
             get {
-                return ((string)(this["TipsLastDismissedVersion"]));
+                return ((bool)(this["AutoHideZoomSecondaryWindow"]));
             }
             set {
-                this["TipsLastDismissedVersion"] = value;
+                this["AutoHideZoomSecondaryWindow"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TipsLastDismissedRevision {
+            get {
+                return ((int)(this["TipsLastDismissedRevision"]));
+            }
+            set {
+                this["TipsLastDismissedRevision"] = value;
             }
         }
 

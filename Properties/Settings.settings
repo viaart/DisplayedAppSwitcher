@@ -7,8 +7,11 @@
     <Setting Name="AutoPositionZoomWindow" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="TipsLastDismissedVersion" Type="System.String" Scope="User">
-      <Value Profile="(Default)"></Value>
+    <Setting Name="AutoHideZoomSecondaryWindow" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="TipsLastDismissedRevision" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="UpdatePostponedUntil" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)">0001-01-01T00:00:00</Value>

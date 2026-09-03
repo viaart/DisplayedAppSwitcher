@@ -257,12 +257,13 @@ To build from source, clone the repository and open `*.csproj` in "Microsoft Vis
 ### Release
 
 * Ensure you are logged in to Azure CLI: `az login` (once per session).
-* Abort running Displayed App Switcher.
-  * `dotnet publish` cannot overwrite the executable while it is running.
+* Abort running Displayed App Switcher, using Exit on its tray icon so the hotkeys unregister cleanly.
+  * A running instance can hold a lock on the published executable while it is being signed. The release script checks for this and stops before changing anything.
 * Commit the changes, but do not push yet.
   * The next step rewrites tracked files, so this is the checkpoint to return to if it fails.
 * `mise run release`, enter the version number.
   * This will:
+    * Check the Azure CLI login and pin `AZURE_TENANT_ID` to that account's tenant, so signing never falls back to an interactive browser login against the wrong tenant. If you are not logged in it stops here, before changing anything.
     * Update the version number in 3 files: `VERSION`, `InnoSetupScript.iss` and `DisplayedAppSwitcher.csproj`.
     * Call Publish through `dotnet` which outputs to `bin\Release\net8.0-windows\publish`.
     * Sign the published executable and DLL with Azure Trusted Signing.

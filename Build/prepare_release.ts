@@ -6,6 +6,66 @@ import { findSigntool } from "./paths";
 const buildDir = import.meta.dir;
 const rootDir = resolve(buildDir, "..");
 
+// Refuse to run while the application is running.
+//
+// The release rewrites and then signs the published executable, and a running instance
+// can hold a lock on it, so the step fails partway with a file in use error. Checked
+// first because it is instant and costs nothing.
+console.log("Checking Displayed App Switcher is not running...");
+const runningPidsQuery =
+  `@(Get-Process DisplayedAppSwitcher -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id) -join ','`;
+const runningPids = (await $`pwsh -NoProfile -Command ${runningPidsQuery}`.nothrow().quiet())
+  .stdout.toString().trim();
+
+if (runningPids) {
+  console.error(`Displayed App Switcher is running (PID ${runningPids}).`);
+  console.error("Exit it from its tray icon, then run this again.");
+  console.error("Use the tray Exit rather than killing it, so the hotkeys unregister cleanly.");
+  process.exit(1);
+}
+console.log("* Displayed App Switcher is not running.");
+
+// Pin the Azure tenant before anything else.
+//
+// The Trusted Signing dlib walks the whole Azure.Identity credential chain and reports
+// "ExcludeCredentials": [], so it will try anything, including an interactive browser
+// login. Without a tenant pinned that login goes to a default tenant which the signing
+// account does not belong to, and fails with "Selected user account does not exist in
+// tenant ... and cannot access the application". Taking the tenant from the logged in
+// Azure CLI keeps signing consistent with whichever account you ran 'az login' as.
+//
+// Checked up here so that being logged out fails immediately, before any file is
+// rewritten or any version is asked for.
+console.log("Checking Azure CLI login...");
+const azAccount = await $`az account show --output json`.nothrow().quiet();
+if (azAccount.exitCode !== 0) {
+  console.error("Not logged in to Azure CLI. Run 'az login' and try again.");
+  process.exit(1);
+}
+
+let tenantId: string | undefined;
+let subscriptionName: string | undefined;
+try {
+  const account = JSON.parse(azAccount.stdout.toString());
+  tenantId = account.tenantId;
+  subscriptionName = account.name;
+} catch {
+  console.error("Could not parse the output of 'az account show'.");
+  process.exit(1);
+}
+
+if (!tenantId) {
+  console.error("No tenantId found in 'az account show'. Run 'az login' and try again.");
+  process.exit(1);
+}
+
+// The $ shell picks this up on its own, which covers signing the exe and the dll.
+// Bun.spawn does not, so the Inno Setup call further down passes the environment
+// explicitly. Without that, the installer and uninstaller would still be signed
+// against the wrong tenant.
+process.env.AZURE_TENANT_ID = tenantId;
+console.log(`* Azure tenant pinned: ${tenantId} (subscription: ${subscriptionName}).`);
+
 const versionFilePath = resolve(rootDir, "VERSION");
 const currentVersion = (await Bun.file(versionFilePath).text()).trim();
 console.log(`Current version: ${currentVersion}`);
@@ -125,6 +185,11 @@ const innoProc = Bun.spawn({
     `/Strustedsigning=${signBatPath} $f`,
     innoSetupFilePath,
   ],
+  // Passed explicitly because Bun.spawn does not pick up changes made to process.env
+  // after start up, unlike the $ shell used above. ISCC runs signtool through the sign
+  // batch file for the Setup and the uninstaller, so without this the installer signing
+  // would still hit the wrong Azure tenant even though the binaries signed fine.
+  env: { ...process.env },
   stdout: "inherit",
   stderr: "inherit",
 });

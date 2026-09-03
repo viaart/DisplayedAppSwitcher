@@ -3,7 +3,7 @@
 
 #define MyAppName "DisplayedAppSwitcher"
 #define MyAppNameWithSpaces "Displayed App Switcher"
-#define MyAppVersion "1.5.1"
+#define MyAppVersion "1.6.0"
 #define MyAppPublisher "Anton Veretennikov"
 #define MyAppURL "https://github.com/viaart/DisplayedAppSwitcher"
 #define MyAppExeName "DisplayedAppSwitcher.exe"

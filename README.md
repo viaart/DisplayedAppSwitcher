@@ -258,12 +258,20 @@ To build from source, clone the repository and open `*.csproj` in "Microsoft Vis
 
 * Ensure you are logged in to Azure CLI: `az login` (once per session).
 * Abort running Displayed App Switcher.
+  * `dotnet publish` cannot overwrite the executable while it is running.
+* Commit the changes, but do not push yet.
+  * The next step rewrites tracked files, so this is the checkpoint to return to if it fails.
 * `mise run release`, enter the version number.
   * This will:
-    * Update the version number in 3 files.
+    * Update the version number in 3 files: `VERSION`, `InnoSetupScript.iss` and `DisplayedAppSwitcher.csproj`.
     * Call Publish through `dotnet` which outputs to `bin\Release\net8.0-windows\publish`.
     * Sign the published executable and DLL with Azure Trusted Signing.
     * Run `InnoSetupScript.iss` which outputs generated Setup to `Setup` folder (Setup exe and uninstaller are also signed).
     * Verify all signatures (exe, dll, and installer).
-* Commit & push changes, tag the commit.
-* Release from the tag, upload generated Setup from `Setup` folder.
+    * Write a `.sha256` checksum next to the generated Setup.
+* `git commit --amend --no-edit` to fold the version bump into the commit.
+  * Keeps one commit per release, and makes the tag point at a commit whose version files match its name. Safe because nothing has been pushed yet.
+* Tag the commit, `git tag v<version>`, then push both: `git push && git push --tags`.
+* Release from the tag, uploading **both** files from the `Setup` folder:
+  * `DisplayedAppSwitcher_<version>_Setup.exe`
+  * `DisplayedAppSwitcher_<version>_Setup.exe.sha256`

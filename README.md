@@ -48,6 +48,7 @@ Right-click the tray icon and navigate to the **Options** submenu to access addi
 
 * **Auto-position Secondary Zoom Window** - When enabled, automatically moves the secondary Zoom window to the secondary monitor if it appears on the wrong display. This is useful because Zoom's secondary window tends to appear on the primary monitor after starting or joining a meeting.
 * **Auto-hide New Secondary Zoom Window** - When enabled, hides the secondary Zoom window whenever a new one appears, such as when a meeting starts, after a reconnect, or when Zoom restarts. A window you bring up yourself with `F10` stays up. A small notification confirms the window was hidden.
+* **Auto-restore JW Library Secondary Window** - When enabled, brings JW Library's secondary window straight back if something minimizes it during a Zoom meeting, such as when a screen share starts or stops. It only acts while JW Library is the selected app, so `F10` still switches to Zoom as usual. A small notification confirms the window was restored.
 
 ## Setup
 
@@ -101,7 +102,8 @@ An attempt to share screen with the hidden secondary Zoom window also helps, as 
 
 **Displayed App Switcher** is _not_ maintaining the state of the applications constantly, but instead only once during an actual request. This is to avoid too much meddling into the behavior of both applications.
 
-The one exception is the optional **Auto-hide New Secondary Zoom Window** feature. It checks about twice a second whether a secondary Zoom window has newly appeared, and if one has, it performs a single switch, the same one `F9` performs. It never acts twice on the same window, so a window you bring up yourself is left alone.
+> [!WARNING]
+> The exceptions are two optional features. **Auto-hide New Secondary Zoom Window** checks about twice a second whether a secondary Zoom window has newly appeared, and if one has, it performs a single switch, the same one `F9` performs. It never acts twice on the same window, so a window you bring up yourself is left alone. **Auto-restore JW Library Secondary Window** is told by Windows whenever a window is minimized, and when it is JW Library's secondary window during a Zoom meeting, it performs that same `F9` switch.
 
 ## Still needed?
 
@@ -154,6 +156,10 @@ The following things could be done to improve the tool:
 
 ## Changelog
 
+- v1.7.0
+  - Add automatic restoring of JW Library's secondary window when something minimizes it during a Zoom meeting, such as when a screen share starts or stops. It is restored exactly as tapping `F9` does, and `F10` still switches to Zoom as usual
+  - Stop restoring and show a notification if the window keeps being minimized again straight away, instead of flickering the shared screen
+  - Tips window now covers all three Options entries
 - v1.6.0
   - Add automatic hiding of the secondary Zoom window whenever a new one appears, such as when a meeting starts, after a reconnect, or when Zoom restarts. JW Library is brought back at the same time, exactly as tapping `F9` does
   - A window brought up with `F10` is left alone, so the feature never competes with switching by hand
@@ -205,7 +211,7 @@ Take note of the following:
 
 * **Never minimize the main Zoom window**, otherwise the secondary Zoom window will also be restored from its hidden state when Zoom is asked to Exit Minimized Video - and this will cover the JW Library on the secondary screen. If that happened by accident, tap `F9` to return to a JW Library mode.
 * If Zoom accidentally crashes, it will restore itself, and rejoin the meeting as Host. At that moment Zoom's secondary window will take over. The **Auto-hide New Secondary Zoom Window** option handles this for you. With it switched off, be ready to quickly tap `F9` while this is happening to prevent a random user being seen.
-* If during an attempt to share screen JW Library accidentally hides, click `F9` to bring it back. This can be done even while the Share Screen dialog is up or right after starting the share. The video doesn't start playing until the secondary window is brought back to vision.
+* If during an attempt to share screen JW Library accidentally hides, click `F9` to bring it back. This can be done even while the Share Screen dialog is up or right after starting the share. The video doesn't start playing until the secondary window is brought back to vision. The **Auto-restore JW Library Secondary Window** option does this for you.
 
 ## How Auto-hiding Works
 
@@ -221,6 +227,20 @@ Two more details are worth knowing:
 2. Only genuine meeting windows are touched. While Zoom is starting a meeting there is a brief moment where its two windows cannot yet be told apart, and acting during it would hide the Zoom controls as well. The tool waits for that moment to pass.
 
 The notification never appears on the monitor that shows JW Library's secondary window, since that is the monitor being shared.
+
+## How Auto-restoring Works
+
+On some computers JW Library's secondary window minimizes itself when a Zoom screen share starts, and sometimes again when it stops, leaving the shared monitor showing the desktop until someone taps `F9`. It does not happen on every computer, and it is not caused by this tool: the only time this tool minimizes JW Library is when you switch to Zoom.
+
+The auto-restore feature asks Windows to report every window that gets minimized. When JW Library's secondary window is one of them, the tool waits a tenth of a second, checks the window is still down, and then performs exactly the same switch as pressing `F9`, followed by a short notification.
+
+It only acts when all of these are true:
+
+1. JW Library is the selected app, meaning your last switch was `F9` (or an automatic hide of Zoom). Pressing `F10` minimizes JW Library on purpose, and that is left alone.
+2. A Zoom meeting is in progress. Outside a meeting nothing is being shared, so minimizing JW Library, for example with `Win+D`, works as normal.
+3. It is not fighting something. If the window is minimized again within a few seconds of being restored, three times in a row, the tool stops and shows a notification instead of flickering the shared screen. Tapping `F9` or `F10` starts it afresh.
+
+> [!NOTE] The window cannot be made truly unminimizable. Windows lets any program minimize any window, and refusing it would mean injecting code into a Windows system process that hosts JW Library's windows. Restoring it the moment it is minimized is the safe equivalent.
 
 > [!TIP] To further improve reliability of switching, a physical device, such as Elgato "Stream Deck" can be obtained. Buttons on such a deck can be assigned to playback keyboard shortcuts, and with modified pictures & labels on the buttons make it even quicker to perform an action.
 

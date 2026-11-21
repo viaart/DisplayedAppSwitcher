@@ -20,6 +20,7 @@ public partial class SettingsForm : Form {
     switchers.Add(AppType.Zoom, new ZoomWorkspaceSwitcher());
     InitializeTrayIcon();
     StartZoomSecondaryWindowWatcher();
+    StartJWLibraryMinimizeWatcher();
     ScheduleCheckForUpdates();
   }
 
@@ -73,6 +74,8 @@ public partial class SettingsForm : Form {
     UnscheduleCheckUpdates();
     zoomSecondaryWindowWatcher?.Dispose();
     zoomSecondaryWindowWatcher = null;
+    jwLibraryMinimizeWatcher?.Dispose();
+    jwLibraryMinimizeWatcher = null;
     HotKeys.Unresister(Handle);
     base.OnClosing(e);
   }
@@ -112,7 +115,7 @@ public partial class SettingsForm : Form {
       // enough: a previous switch to Zoom left the JW Library secondary window
       // minimized, so it has to be restored at the same time or the shared
       // monitor is left showing the desktop.
-      BringToTop(AppType.JWLibrary);
+      BringToTop(AppType.JWLibrary, userInitiated: false);
 
       AutoHideNotificationForm.ShowNotification(
         "Zoom secondary window has been automatically"
@@ -120,6 +123,77 @@ public partial class SettingsForm : Form {
         + "\r\nTip: Tap F10 to bring it back.", 5_000);
     };
     zoomSecondaryWindowWatcher.Start();
+  }
+
+  private JWLibraryMinimizeWatcher? jwLibraryMinimizeWatcher;
+
+  // Fight guard for auto-restoring. A minimize that follows one of our restores this
+  // closely means something is minimizing the window as fast as it comes back. After
+  // a few rounds of that, stop until the user switches by hand, rather than flicker
+  // the shared screen for the rest of the meeting. Separate share starts and stops are
+  // seconds apart and do not count.
+  private static readonly TimeSpan QuickReminimizeWindow = TimeSpan.FromSeconds(3);
+  private const int MaxQuickReminimizes = 3;
+  private DateTime lastAutoRestore = DateTime.MinValue;
+  private int quickReminimizeCount;
+  private bool autoRestorePaused;
+
+  private void StartJWLibraryMinimizeWatcher() {
+    jwLibraryMinimizeWatcher = new JWLibraryMinimizeWatcher(switchers[AppType.JWLibrary]);
+    jwLibraryMinimizeWatcher.SecondaryWindowMinimized += (_, _) => RestoreMinimizedJWLibrary();
+    jwLibraryMinimizeWatcher.Start();
+  }
+
+  private void RestoreMinimizedJWLibrary() {
+    if (!SettingsManager.GetAutoRestoreJWLibrarySecondaryWindowEnabled()) {
+      return;
+    }
+
+    // Switching to Zoom minimizes JW Library on purpose. Only restore while JW Library
+    // is the application the user last asked for, by F9 or by auto-hiding.
+    if (lastSwitcherIndex != (int)AppType.JWLibrary) {
+      return;
+    }
+
+    // Outside a meeting nothing is being shared, and restoring would only get in the
+    // user's way, for example after Win+D.
+    if (!ZoomSecondaryWindowWatcher.IsMeetingInProgress()) {
+      return;
+    }
+
+    if (autoRestorePaused) {
+      return;
+    }
+
+    var now = DateTime.UtcNow;
+    quickReminimizeCount = now - lastAutoRestore < QuickReminimizeWindow
+      ? quickReminimizeCount + 1
+      : 0;
+    if (quickReminimizeCount >= MaxQuickReminimizes) {
+      autoRestorePaused = true;
+      AutoHideNotificationForm.ShowNotification(
+        "JW Library secondary window keeps being minimized."
+        + "\r\nAutomatic restoring is paused."
+        + "\r\nTap F9 to bring it back.", 8_000);
+      return;
+    }
+    lastAutoRestore = now;
+
+    // The same switch F9 performs, so the window comes back exactly as it does by hand.
+    BringToTop(AppType.JWLibrary, userInitiated: false);
+
+    AutoHideNotificationForm.ShowNotification(
+      "JW Library secondary window was minimized"
+      + "\r\nand has been restored by Displayed App Switcher.", 3_000);
+  }
+
+  /// <summary>
+  /// Clears the fight guard. Any switch the user makes by hand is a fresh start.
+  /// </summary>
+  private void ResetAutoRestoreGuard() {
+    autoRestorePaused = false;
+    quickReminimizeCount = 0;
+    lastAutoRestore = DateTime.MinValue;
   }
 
   private ManagementEventWatcher? powerEventWatcher;
@@ -243,10 +317,19 @@ CheckForNewReleaseAsync() {
     BringToTop((AppType)lastSwitcherIndex);
   }
 
-  void BringToTop(AppType appTypeIndex) {
+  /// <param name="appTypeIndex">Application to bring forward</param>
+  /// <param name="userInitiated">
+  /// False when the application switches on its own (auto-hiding, auto-restoring),
+  /// so that those switches do not count as the user taking over.
+  /// </param>
+  void BringToTop(AppType appTypeIndex, bool userInitiated = true) {
     ISwitcher switcher = switchers[appTypeIndex]; // Throws an exception if not found. We are fine with the early error discovery.
     // And remember the last one in case it's called aside of switch
     lastSwitcherIndex = (int)appTypeIndex;
+
+    if (userInitiated) {
+      ResetAutoRestoreGuard();
+    }
 
     // Clear target monitor at the start of each switch to Zoom
     // This ensures fresh detection of JW Library's monitor location
@@ -356,6 +439,13 @@ public class TrayIcon {
     autoHideMenuItem.ToolTipText = "Hides a new secondary Zoom window as soon as it appears.";
     optionsMenu.DropDownItems.Add(autoHideMenuItem);
 
+    // Auto-restore JW Library secondary window checkbox
+    var autoRestoreMenuItem = new ToolStripMenuItem("Auto-restore JW Library Secondary Window", null, OnAutoRestoreToggleClick);
+    autoRestoreMenuItem.CheckOnClick = true;
+    autoRestoreMenuItem.Checked = SettingsManager.GetAutoRestoreJWLibrarySecondaryWindowEnabled();
+    autoRestoreMenuItem.ToolTipText = "Brings JW Library's secondary window back if something minimizes it during a Zoom meeting.";
+    optionsMenu.DropDownItems.Add(autoRestoreMenuItem);
+
     trayMenu.Items.Add(optionsMenu);
     trayMenu.Items.Add(new ToolStripSeparator());
 
@@ -455,6 +545,18 @@ public class TrayIcon {
     }
   }
 
+  private void OnAutoRestoreToggleClick(object? sender, EventArgs e) {
+    try {
+      if (sender is ToolStripMenuItem menuItem) {
+        SettingsManager.SetAutoRestoreJWLibrarySecondaryWindowEnabled(menuItem.Checked);
+        UpdateTrayIconTooltip();
+      }
+    } catch (Exception ex) {
+      MessageBox.Show($"Failed to update auto-restore setting: {ex.Message}",
+                      "Settings Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+  }
+
   private void OnSettingsClick(object? sender, EventArgs e) {
     SettingsClick?.Invoke(this, e);
   }
@@ -466,10 +568,13 @@ public class TrayIcon {
     try {
       bool autoPositionEnabled = SettingsManager.GetAutoPositionEnabled();
       bool autoHideEnabled = SettingsManager.GetAutoHideZoomSecondaryWindowEnabled();
+      bool autoRestoreEnabled = SettingsManager.GetAutoRestoreJWLibrarySecondaryWindowEnabled();
       string baseTooltip = "Displayed App Switcher";
+      // NotifyIcon.Text is limited to 127 characters. This is 96 at its longest.
       string statusTooltip =
         $"{baseTooltip}\nAuto-positioning: {(autoPositionEnabled ? "Enabled" : "Disabled")}"
-        + $"\nAuto-hiding: {(autoHideEnabled ? "Enabled" : "Disabled")}";
+        + $"\nAuto-hiding: {(autoHideEnabled ? "Enabled" : "Disabled")}"
+        + $"\nAuto-restoring: {(autoRestoreEnabled ? "Enabled" : "Disabled")}";
 
       if (trayIcon != null) {
         trayIcon.Text = statusTooltip;

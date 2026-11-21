@@ -66,6 +66,28 @@ public static class SettingsManager {
     }
 
     /// <summary>
+    /// Gets whether JW Library's secondary window is restored automatically when
+    /// something minimizes it during a Zoom meeting.
+    /// </summary>
+    public static bool GetAutoRestoreJWLibrarySecondaryWindowEnabled() {
+        lock (_lockObject) {
+            return Settings.Default.AutoRestoreJWLibrarySecondaryWindow;
+        }
+    }
+
+    /// <summary>
+    /// Sets whether JW Library's secondary window is restored automatically when
+    /// something minimizes it during a Zoom meeting.
+    /// </summary>
+    /// <param name="enabled">True to enable auto-restoring, false to disable</param>
+    public static void SetAutoRestoreJWLibrarySecondaryWindowEnabled(bool enabled) {
+        lock (_lockObject) {
+            Settings.Default.AutoRestoreJWLibrarySecondaryWindow = enabled;
+            SaveSettings();
+        }
+    }
+
+    /// <summary>
     /// Loads settings from the user configuration file.
     /// </summary>
     public static void LoadSettings() {
@@ -105,6 +127,7 @@ public static class SettingsManager {
                 // If reset fails, manually set known defaults
                 Settings.Default.AutoPositionZoomWindow = true;
                 Settings.Default.AutoHideZoomSecondaryWindow = true;
+                Settings.Default.AutoRestoreJWLibrarySecondaryWindow = true;
             }
         }
     }
@@ -160,8 +183,9 @@ public static class SettingsManager {
     /// History:
     ///   1  Auto-positioning
     ///   2  Auto-hiding, and the Options submenu gaining a second entry
+    ///   3  Auto-restoring JW Library, the third Options entry
     /// </summary>
-    public const int TipsContentRevision = 2;
+    public const int TipsContentRevision = 3;
 
     /// <summary>
     /// Gets the Tips revision that the user last dismissed. Zero means never dismissed.

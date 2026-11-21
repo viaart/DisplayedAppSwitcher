@@ -49,6 +49,18 @@ namespace DisplayedAppSwitcher.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoRestoreJWLibrarySecondaryWindow {
+            get {
+                return ((bool)(this["AutoRestoreJWLibrarySecondaryWindow"]));
+            }
+            set {
+                this["AutoRestoreJWLibrarySecondaryWindow"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int TipsLastDismissedRevision {
             get {

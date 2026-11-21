@@ -91,8 +91,15 @@ public partial class TipsForm : Form {
              + "exactly as tapping F9 would do. A window you bring up yourself with "
              + "F10 stays up.\n\n", regular);
 
-        Append("Both options are enabled by default. Use the Options submenu on the "
-             + "tray icon to change them.", regular);
+        Append("Auto-restore JW Library Secondary Window", bold);
+        Append(" (since 1.7.0)\n", regular);
+        Append("On some computers JW Library's secondary window minimizes itself when "
+             + "a Zoom screen share starts or stops. During a meeting it is now "
+             + "brought back straight away, exactly as tapping F9 would do. Tapping "
+             + "F10 still switches to Zoom as usual.\n\n", regular);
+
+        Append("All three options are enabled by default. Use the Options submenu on "
+             + "the tray icon to change them.", regular);
 
         // Leave the caret at the start with nothing selected, so no highlight shows.
         explanationText.SelectionStart = 0;

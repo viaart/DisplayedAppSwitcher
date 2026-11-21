@@ -11,6 +11,12 @@ RegisterHotKey
 UnregisterHotKey
 IsWindowVisible
 IsWindow
+IsIconic
+SetWinEventHook
+UnhookWinEvent
+EVENT_SYSTEM_MINIMIZESTART
+WINEVENT_OUTOFCONTEXT
+WINEVENT_SKIPOWNPROCESS
 
 EnumDisplayMonitors
 GetMonitorInfo

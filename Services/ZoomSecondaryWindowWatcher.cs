@@ -111,6 +111,30 @@ public sealed class ZoomSecondaryWindowWatcher : IDisposable {
   }
 
   /// <summary>
+  /// Whether a Zoom meeting is currently running, visible or not.
+  ///
+  /// Zoom renames its meeting windows from "Zoom Workplace" to "Zoom Meeting" when a
+  /// meeting starts and destroys them when it ends. The title survives while the
+  /// window is hidden, both for the secondary window hidden by F9 and for the main
+  /// meeting window that Zoom itself hides for the whole of a screen share.
+  /// </summary>
+  public static bool IsMeetingInProgress() {
+    var zeroHWND = new Windows.Win32.Foundation.HWND(IntPtr.Zero);
+    var hWnd = IntPtr.Zero;
+
+    while (true) {
+      hWnd = PInvoke.FindWindowEx(zeroHWND, new Windows.Win32.Foundation.HWND(hWnd),
+        ZoomWindowClassName, null as string);
+      if (hWnd == IntPtr.Zero) {
+        return false;
+      }
+      if (Win32Helpers.GetWindowInfo(hWnd).title == ZoomMeetingWindowTitle) {
+        return true;
+      }
+    }
+  }
+
+  /// <summary>
   /// Finds the visible secondary Zoom meeting window, or IntPtr.Zero if there is none.
   ///
   /// This deliberately does not reuse ZoomWorkspaceSwitcher.IsTheRightWindow. That

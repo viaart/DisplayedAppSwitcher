@@ -73,9 +73,9 @@ namespace DisplayedAppSwitcher {
             screenshotPictureBox.Location = new Point(3, 45);
             screenshotPictureBox.Margin = new Padding(3, 0, 3, 0);
             screenshotPictureBox.Name = "screenshotPictureBox";
-            // Sized to the image's own 918x357 aspect at the 200px row height, so Zoom
+            // Sized to the image's own 924x357 aspect at the 200px row height, so Zoom
             // scales it edge to edge and has no spare box to centre it within.
-            screenshotPictureBox.Size = new Size(514, 200);
+            screenshotPictureBox.Size = new Size(518, 200);
             screenshotPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
             screenshotPictureBox.TabIndex = 1;
             screenshotPictureBox.TabStop = false;
@@ -155,7 +155,10 @@ namespace DisplayedAppSwitcher {
             AcceptButton = okButton;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(666, 620);
+            // Height sized for three Options entries. Measured with the explanation at its
+            // full length: 241px of text in a 253px box at 100 percent scaling, and 478px
+            // in a 520px box at 175 percent, so no scroll bar at the natural size.
+            ClientSize = new Size(666, 690);
             Controls.Add(mainPanel);
             // Sizable rather than FixedDialog, so the window can be made smaller than the
             // content needs. The explanation then scrolls instead of losing its last lines.

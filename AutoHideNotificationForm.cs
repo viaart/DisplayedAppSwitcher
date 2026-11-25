@@ -136,7 +136,15 @@ public sealed class AutoHideNotificationForm : Form {
     // The shared monitor is the one holding the JW Library secondary window, so
     // the notification must not land there. It carries no taskbar, which means
     // the primary screen is normally the correct choice already.
-    var sharedMonitor = TargetMonitorTracker.JWLibraryTargetMonitor;
+    //
+    // Found afresh each time. The monitor recorded on the last F10 is missing after
+    // a restart, and when F10 found JW Library already minimized; falling back to the
+    // primary screen then would put the popup on the audience's screen wherever the
+    // shared monitor is the primary one.
+    var jwLibraryWindow = JWLibrarySwitcher.FindSecondaryWindow();
+    var sharedMonitor = jwLibraryWindow != IntPtr.Zero
+      ? Services.MonitorService.GetMonitorFromWindow(jwLibraryWindow)
+      : TargetMonitorTracker.JWLibraryTargetMonitor;
     if (sharedMonitor == null || primary.Bounds != sharedMonitor.Bounds) {
       return primary;
     }

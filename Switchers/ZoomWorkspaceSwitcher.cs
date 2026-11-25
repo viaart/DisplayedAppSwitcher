@@ -26,15 +26,13 @@ public class ZoomWorkspaceSwitcher : ISwitcher {
     }
 
     // Case 2: Zoom Meeting secondary window (during active meeting)
-    // This is the window without the control panel, used for screen sharing display
-    if (info.title == "Zoom Meeting" && info.className == "ConfMultiTabContentWndClass") {
-      // Recursively search for control panel - main window has it, secondary doesn't (max 3 levels deep)
-      bool hasControlPanel = Win32Helpers.FindChildWindowRecursive(info.hWnd, "ZPControlPanelClass", null, 3);
-
-      bool isSecondary = !hasControlPanel;
-      System.Diagnostics.Debug.WriteLine($"ZoomWorkspaceSwitcher: Window 0x{info.hWnd:X} '{info.title}' hasControlPanel={hasControlPanel} isSecondary={isSecondary}");
-
-      // Secondary window does NOT have the control panel
+    // This is the window without the control panel, used for screen sharing display.
+    // Only while the other meeting window has its panel: while Zoom is still building
+    // it, both lack one, and hiding "the one without a panel" would hide the meeting
+    // controls too. See ZoomMeetingWindows.FindSecondaryWindows.
+    if (info.title == ZoomMeetingWindows.MeetingTitle && info.className == ZoomMeetingWindows.ClassName) {
+      bool isSecondary = ZoomMeetingWindows.FindSecondaryWindows().Contains(info.hWnd);
+      System.Diagnostics.Debug.WriteLine($"ZoomWorkspaceSwitcher: Window 0x{info.hWnd:X} '{info.title}' isSecondary={isSecondary}");
       return isSecondary;
     }
 

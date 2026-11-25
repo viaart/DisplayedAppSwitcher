@@ -101,42 +101,68 @@ public partial class SettingsForm : Form {
     };
     icon.CheckUpdateClick += CheckForUpdatesEvent(true);
     icon.AutoHideEnabled += (_, _) => {
-      // Leave a window the user is currently looking at alone.
+      // While Zoom is selected, leave the window the user is looking at alone. While
+      // JW Library is selected this has no effect: the secondary window is hidden
+      // whenever it is on screen, which is the point of switching the option on.
       zoomSecondaryWindowWatcher?.SeedFromCurrentState();
     };
   }
 
   private ZoomSecondaryWindowWatcher? zoomSecondaryWindowWatcher;
 
+  // The popup after an automatic hide appears at most this often. Every share stop now
+  // triggers a hide, and Zoom can re-show the window several times while it stops, so a
+  // popup per hide would keep replacing itself on the operator's screen.
+  private static readonly TimeSpan AutoHideNotificationInterval = TimeSpan.FromSeconds(10);
+  private DateTime lastAutoHideNotification = DateTime.MinValue;
+
   private void StartZoomSecondaryWindowWatcher() {
     zoomSecondaryWindowWatcher = new ZoomSecondaryWindowWatcher();
-    zoomSecondaryWindowWatcher.NewSecondaryWindowDetected += (_, _) => {
-      // Run the same switch F9 performs. Hiding the Zoom window alone is not
-      // enough: a previous switch to Zoom left the JW Library secondary window
-      // minimized, so it has to be restored at the same time or the shared
-      // monitor is left showing the desktop.
-      BringToTop(AppType.JWLibrary, userInitiated: false);
+    zoomSecondaryWindowWatcher.NewSecondaryWindowDetected += (_, _) => HideZoomSecondaryWindow();
+    zoomSecondaryWindowWatcher.Start();
+  }
 
+  private void HideZoomSecondaryWindow() {
+    if (lastSwitcherIndex == (int)AppType.JWLibrary && JWLibrarySwitcher.IsSecondaryWindowUp()) {
+      // JW Library is already on the shared screen, so only the Zoom window has to go.
+      // The full F9 switch would also bring JW Library to the foreground, taking the
+      // operator's focus away from whatever they are doing every time a share stops.
+      HideOthers(switchers[AppType.JWLibrary]);
+    } else {
+      // Run the same switch F9 performs. Hiding the Zoom window alone is not enough
+      // here: a switch to Zoom, or something else, has left the JW Library secondary
+      // window minimized, so it has to be restored too or the shared monitor is left
+      // showing the desktop.
+      BringToTop(AppType.JWLibrary, userInitiated: false);
+    }
+
+    var now = DateTime.UtcNow;
+    if (now - lastAutoHideNotification >= AutoHideNotificationInterval) {
+      lastAutoHideNotification = now;
       AutoHideNotificationForm.ShowNotification(
         "Zoom secondary window has been automatically"
         + "\r\nhidden by Displayed App Switcher."
         + "\r\nTip: Tap F10 to bring it back.", 5_000);
-    };
-    zoomSecondaryWindowWatcher.Start();
+    }
   }
 
   private JWLibraryMinimizeWatcher? jwLibraryMinimizeWatcher;
 
   // Fight guard for auto-restoring. A minimize that follows one of our restores this
   // closely means something is minimizing the window as fast as it comes back. After
-  // a few rounds of that, stop until the user switches by hand, rather than flicker
-  // the shared screen for the rest of the meeting. Separate share starts and stops are
-  // seconds apart and do not count.
+  // a few rounds of that, pause rather than flicker the shared screen. Separate share
+  // starts and stops are seconds apart and do not count.
+  //
+  // The pause ends when the user switches by hand, or after a minute. A fight lasts as
+  // long as a share is starting or stopping; without the time limit a later meeting
+  // could run with auto-restoring silently off if nobody touched a key.
   private static readonly TimeSpan QuickReminimizeWindow = TimeSpan.FromSeconds(3);
   private const int MaxQuickReminimizes = 3;
+  private static readonly TimeSpan AutoRestorePauseLength = TimeSpan.FromMinutes(1);
   private DateTime lastAutoRestore = DateTime.MinValue;
   private int quickReminimizeCount;
   private bool autoRestorePaused;
+  private DateTime autoRestorePausedAt = DateTime.MinValue;
 
   private void StartJWLibraryMinimizeWatcher() {
     jwLibraryMinimizeWatcher = new JWLibraryMinimizeWatcher(switchers[AppType.JWLibrary]);
@@ -157,23 +183,27 @@ public partial class SettingsForm : Form {
 
     // Outside a meeting nothing is being shared, and restoring would only get in the
     // user's way, for example after Win+D.
-    if (!ZoomSecondaryWindowWatcher.IsMeetingInProgress()) {
-      return;
-    }
-
-    if (autoRestorePaused) {
+    if (!ZoomMeetingWindows.IsMeetingInProgress()) {
       return;
     }
 
     var now = DateTime.UtcNow;
+    if (autoRestorePaused) {
+      if (now - autoRestorePausedAt < AutoRestorePauseLength) {
+        return;
+      }
+      ResetAutoRestoreGuard();
+    }
+
     quickReminimizeCount = now - lastAutoRestore < QuickReminimizeWindow
       ? quickReminimizeCount + 1
       : 0;
     if (quickReminimizeCount >= MaxQuickReminimizes) {
       autoRestorePaused = true;
+      autoRestorePausedAt = now;
       AutoHideNotificationForm.ShowNotification(
         "JW Library secondary window keeps being minimized."
-        + "\r\nAutomatic restoring is paused."
+        + "\r\nAutomatic restoring is paused for a minute."
         + "\r\nTap F9 to bring it back.", 8_000);
       return;
     }
@@ -337,65 +367,73 @@ CheckForNewReleaseAsync() {
       TargetMonitorTracker.ClearTargetMonitor();
     }
 
-    Windows.Win32.Foundation.HWND hWndParent = new(IntPtr.Zero);
+    if (appTypeIndex == AppType.JWLibrary) {
+      // Show JW Library before hiding Zoom. JW Library's secondary window is topmost and
+      // fills the shared monitor, so the audience sees it straight away. Hiding Zoom
+      // waits until Zoom processes it, which takes seconds while Zoom is busy, as it is
+      // when a share stops (measured at about 3 s while a meeting was starting).
+      ShowTarget(switcher);
+      HideOthers(switcher);
+    } else {
+      // Minimize JW Library first: that is when its monitor is recorded, and
+      // auto-positioning needs it before the Zoom window is shown.
+      HideOthers(switcher);
+      ShowTarget(switcher);
+    }
 
-    var hWnd = IntPtr.Zero;
-    while (true) {
-      hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
-      if (hWnd != IntPtr.Zero) {
-        var p = Win32Helpers.GetWindowInfo(hWnd);
-        foreach (var s in switchers) {
-          if (!s.Value.Equals(switcher)) {
-            if (s.Value.IsTheRightWindow(p, Purpose.Hide)) {
-              s.Value.OtherSwitchedBefore(hWnd);
-            }
-          }
+    foreach (var hWnd in Win32Helpers.GetTopLevelWindows()) {
+      var p = Win32Helpers.GetWindowInfo(hWnd);
+      foreach (var s in switchers.Values) {
+        if (!s.Equals(switcher) && s.IsTheRightWindow(p, Purpose.Hide)) {
+          s.OtherSwitchedAfter(hWnd);
         }
-
-      } else {
-        break;
       }
     }
 
-    hWnd = IntPtr.Zero;
-    while (true) {
-      hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
-      if (hWnd != IntPtr.Zero) {
-        var p = Win32Helpers.GetWindowInfo(hWnd);
-        if (switcher.IsTheRightWindow(p, Purpose.Show)) {
-          switcher.SwitchTo(hWnd);
-        }
-      } else {
-        break;
-      }
-    }
-
-    while (true) {
-      hWnd = PInvoke.FindWindowEx(hWndParent, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
-      if (hWnd != IntPtr.Zero) {
-        var p = Win32Helpers.GetWindowInfo(hWnd);
-        foreach (var s in switchers) {
-          if (!s.Value.Equals(switcher)) {
-            if (s.Value.IsTheRightWindow(p, Purpose.Hide)) {
-              s.Value.OtherSwitchedAfter(hWnd);
-            }
-          }
-        }
-      } else {
-        break;
-      }
-    }
-
-    // This switch has just put the Zoom windows into the state the user asked for,
-    // so whatever is visible now was shown deliberately and must not be treated as
-    // a window that appeared on its own. Without this, a secondary window that was
-    // already hidden when the application started would be hidden again a moment
-    // after the first switch to Zoom, because the watcher had never seen it before.
+    // The secondary Zoom window only appears on F10. While JW Library is selected
+    // the watcher hides every appearance of it, including Zoom bringing the same
+    // window back when a screen share stops.
     //
-    // Safe to call for a switch to either application. After a switch to JW Library
-    // the Zoom window is hidden, so nothing is remembered, and a window Zoom brings
-    // back by itself is still detected.
-    zoomSecondaryWindowWatcher?.SeedFromCurrentState();
+    // After a switch to Zoom, the window F10 just showed is remembered so the watcher
+    // leaves it alone. Without this, a secondary window that was already hidden when
+    // the application started would be hidden again a moment after the first switch
+    // to Zoom, because the watcher had never seen it before.
+    //
+    // Nothing is remembered after a switch to JW Library. Doing so is what let 1.7.0
+    // keep the window on the shared screen: when Zoom re-showed it during the switch,
+    // it was recorded as wanted and never hidden again.
+    if (zoomSecondaryWindowWatcher != null) {
+      zoomSecondaryWindowWatcher.JWLibrarySelected = appTypeIndex == AppType.JWLibrary;
+      if (appTypeIndex == AppType.Zoom) {
+        zoomSecondaryWindowWatcher.SeedFromCurrentState();
+      }
+    }
+  }
+
+  /// <summary>
+  /// Runs OtherSwitchedBefore on every window of the other applications: hides Zoom's
+  /// secondary window when JW Library is the target, minimizes JW Library's when Zoom is.
+  /// </summary>
+  private void HideOthers(ISwitcher target) {
+    foreach (var hWnd in Win32Helpers.GetTopLevelWindows()) {
+      var p = Win32Helpers.GetWindowInfo(hWnd);
+      foreach (var s in switchers.Values) {
+        if (!s.Equals(target) && s.IsTheRightWindow(p, Purpose.Hide)) {
+          s.OtherSwitchedBefore(hWnd);
+        }
+      }
+    }
+  }
+
+  /// <summary>
+  /// Brings the target application's secondary window forward.
+  /// </summary>
+  private void ShowTarget(ISwitcher target) {
+    foreach (var hWnd in Win32Helpers.GetTopLevelWindows()) {
+      if (target.IsTheRightWindow(Win32Helpers.GetWindowInfo(hWnd), Purpose.Show)) {
+        target.SwitchTo(hWnd);
+      }
+    }
   }
 }
 
@@ -436,7 +474,7 @@ public class TrayIcon {
     var autoHideMenuItem = new ToolStripMenuItem("Auto-hide New Secondary Zoom Window", null, OnAutoHideToggleClick);
     autoHideMenuItem.CheckOnClick = true;
     autoHideMenuItem.Checked = SettingsManager.GetAutoHideZoomSecondaryWindowEnabled();
-    autoHideMenuItem.ToolTipText = "Hides a new secondary Zoom window as soon as it appears.";
+    autoHideMenuItem.ToolTipText = "Keeps the secondary Zoom window hidden unless you bring it up with F10.";
     optionsMenu.DropDownItems.Add(autoHideMenuItem);
 
     // Auto-restore JW Library secondary window checkbox

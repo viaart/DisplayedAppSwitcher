@@ -5,6 +5,28 @@ using DisplayedAppSwitcher.Services;
 namespace DisplayedAppSwitcher;
 
 public class JWLibrarySwitcher : ISwitcher {
+
+  /// <summary>
+  /// Finds JW Library's secondary window, minimized or not, or IntPtr.Zero if there is none.
+  /// </summary>
+  public static IntPtr FindSecondaryWindow() {
+    var switcher = new JWLibrarySwitcher();
+    foreach (var hWnd in Win32Helpers.GetTopLevelWindows()) {
+      if (switcher.IsTheRightWindow(Win32Helpers.GetWindowInfo(hWnd), Purpose.Show)) {
+        return hWnd;
+      }
+    }
+    return IntPtr.Zero;
+  }
+
+  /// <summary>
+  /// Whether JW Library's secondary window is on screen: present, visible and not minimized.
+  /// </summary>
+  public static bool IsSecondaryWindowUp() {
+    var h = new Windows.Win32.Foundation.HWND(FindSecondaryWindow());
+    return !h.IsNull && PInvoke.IsWindowVisible(h) && !PInvoke.IsIconic(h);
+  }
+
   public bool IsTheRightWindow(SwitcherWindowInfo info, Purpose purpose) {
     // JW Library creates several windows for dual monitor.
     //

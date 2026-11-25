@@ -1,6 +1,10 @@
 [tools]
 bun = "latest"
 
+[tasks.dev]
+description = "Stop any running Displayed App Switcher, build Debug and start the local build"
+run = "pwsh -NoProfile -File Build/dev.ps1"
+
 [tasks.release]
 description = "Prepare a new release (build, sign, package)"
 run = "bun Build/prepare_release.ts"

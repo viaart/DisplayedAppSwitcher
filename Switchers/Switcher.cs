@@ -88,6 +88,25 @@ public unsafe class Win32Helpers {
     return false;
   }
 
+  /// <summary>
+  /// All top level windows, captured before anything acts on them. Walking the list
+  /// with FindWindowEx while showing windows is not safe: showing one moves it in the
+  /// Z order, so a walk can revisit windows, and two matching windows would bring each
+  /// other forward forever.
+  /// </summary>
+  public static List<IntPtr> GetTopLevelWindows() {
+    var windows = new List<IntPtr>();
+    var zeroHWND = new Windows.Win32.Foundation.HWND(IntPtr.Zero);
+    var hWnd = IntPtr.Zero;
+    while (true) {
+      hWnd = PInvoke.FindWindowEx(zeroHWND, new Windows.Win32.Foundation.HWND(hWnd), null as string, null as string);
+      if (hWnd == IntPtr.Zero) {
+        return windows;
+      }
+      windows.Add(hWnd);
+    }
+  }
+
   public static SwitcherWindowInfo GetWindowInfo(IntPtr hWnd) {
     var h = new Windows.Win32.Foundation.HWND(hWnd);
     var tBuffHolder = new BufferHolder();
@@ -95,14 +114,15 @@ public unsafe class Win32Helpers {
     string s;
     string c;
     unsafe {
+      // The buffers hold 255 characters including the terminator.
       fixed (char* charPtr = tBuffHolder.buffer.fixedBuffer) {
         var b = new Windows.Win32.Foundation.PWSTR(charPtr);
-        _ = PInvoke.GetWindowText(h, b, 256);
+        _ = PInvoke.GetWindowText(h, b, 255);
         s = new string(charPtr);
       }
       fixed (char* charPtr = cBuffHolder.buffer.fixedBuffer) {
         var b = new Windows.Win32.Foundation.PWSTR(charPtr);
-        _ = PInvoke.GetClassName(h, b, 256);
+        _ = PInvoke.GetClassName(h, b, 255);
         c = new string(charPtr);
       }
 

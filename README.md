@@ -47,7 +47,7 @@ Right-click the tray icon and navigate to the **Options** submenu to access addi
 ![Options submenu](Resources/Screenshots/new-features.png)
 
 * **Auto-position Secondary Zoom Window** - When enabled, automatically moves the secondary Zoom window to the secondary monitor if it appears on the wrong display. This is useful because Zoom's secondary window tends to appear on the primary monitor after starting or joining a meeting.
-* **Auto-hide New Secondary Zoom Window** - When enabled, hides the secondary Zoom window whenever a new one appears, such as when a meeting starts, after a reconnect, or when Zoom restarts. A window you bring up yourself with `F10` stays up. A small notification confirms the window was hidden.
+* **Auto-hide New Secondary Zoom Window** - When enabled, hides the secondary Zoom window whenever a new one appears, such as when a meeting starts, after a reconnect, or when Zoom restarts. While JW Library is selected it is also hidden every time Zoom brings it back, such as when a screen share stops, so it only stays up after you press `F10`. A small notification confirms the window was hidden.
 * **Auto-restore JW Library Secondary Window** - When enabled, brings JW Library's secondary window straight back if something minimizes it during a Zoom meeting, such as when a screen share starts or stops. It only acts while JW Library is the selected app, so `F10` still switches to Zoom as usual. A small notification confirms the window was restored.
 
 ## Setup
@@ -103,7 +103,7 @@ An attempt to share screen with the hidden secondary Zoom window also helps, as 
 **Displayed App Switcher** is _not_ maintaining the state of the applications constantly, but instead only once during an actual request. This is to avoid too much meddling into the behavior of both applications.
 
 > [!WARNING]
-> The exceptions are two optional features. **Auto-hide New Secondary Zoom Window** checks about twice a second whether a secondary Zoom window has newly appeared, and if one has, it performs a single switch, the same one `F9` performs. It never acts twice on the same window, so a window you bring up yourself is left alone. **Auto-restore JW Library Secondary Window** is told by Windows whenever a window is minimized, and when it is JW Library's secondary window during a Zoom meeting, it performs that same `F9` switch.
+> The exceptions are two optional features. **Auto-hide New Secondary Zoom Window** is told by Windows the moment a Zoom meeting window appears, and also checks about twice a second. If the secondary window is on screen when it should not be, it performs the same switch `F9` performs. The window you bring up yourself with `F10` is left alone. **Auto-restore JW Library Secondary Window** is told by Windows whenever a window is minimized, and when it is JW Library's secondary window during a Zoom meeting, it performs that same `F9` switch.
 
 ## Still needed?
 
@@ -156,6 +156,13 @@ The following things could be done to improve the tool:
 
 ## Changelog
 
+- v1.7.1
+  - Fix the secondary Zoom window coming back on the shared screen when a screen share stops, and staying there until `F9`. While JW Library is selected it is now hidden every time it appears; it only stays up after `F10`
+  - Hide it the moment it appears, instead of at the next check up to half a second later
+  - Never hide Zoom's meeting controls window, even in the moment while Zoom is still building it
+  - When switching back to JW Library, show it before hiding Zoom, so the shared screen shows JW Library straight away even while Zoom is busy
+  - Hiding the Zoom window while JW Library is already showing no longer moves the keyboard focus, and the notification appears at most every 10 seconds
+  - Automatic restoring of JW Library resumes a minute after it pauses, and notifications never appear on the shared screen
 - v1.7.0
   - Add automatic restoring of JW Library's secondary window when something minimizes it during a Zoom meeting, such as when a screen share starts or stops. It is restored exactly as tapping `F9` does, and `F10` still switches to Zoom as usual
   - Stop restoring and show a notification if the window keeps being minimized again straight away, instead of flickering the shared screen
@@ -217,13 +224,15 @@ Take note of the following:
 
 Zoom does not keep one long-lived secondary window. It destroys and recreates its meeting windows every time a meeting starts, every time the connection drops and recovers, and every time Zoom restarts after a crash. Each rebuild puts the secondary window back on screen, where the audience can see it until someone taps `F9`.
 
-The auto-hide feature watches for this. Roughly twice a second it looks for a secondary Zoom meeting window that is visible and that it has not already handled. When it finds one, it performs exactly the same switch as pressing `F9`, then shows a short notification.
+Zoom also brings back the secondary window it already has. In a real meeting it re-shows it on the shared screen every time a screen share stops.
+
+The auto-hide feature watches for both. Windows tells it the moment a Zoom meeting window appears, and as a backstop it also looks about twice a second. When the secondary window is on screen and should not be, it performs exactly the same switch as pressing `F9`, then shows a short notification.
 
 Running the full switch matters. Pressing `F10` to move to Zoom minimizes JW Library's secondary window, so simply hiding the Zoom window would leave the shared monitor showing the desktop. Instead the tool hides Zoom's secondary window and brings JW Library's secondary window back at the same time, exactly as `F9` does.
 
 Two more details are worth knowing:
 
-1. The tool remembers the window it handled. When you press `F10` to bring Zoom forward, that is the same window, so it is left alone. The feature never fights your own switching.
+1. The secondary Zoom window only appears when you press `F10`. While JW Library is selected, every appearance is hidden, even when it is the same window coming back. After `F10` the tool remembers the window you brought up and leaves it alone, so the feature never fights your own switching; only a newly created window, after a reconnect or a Zoom restart, is hidden then.
 2. Only genuine meeting windows are touched. While Zoom is starting a meeting there is a brief moment where its two windows cannot yet be told apart, and acting during it would hide the Zoom controls as well. The tool waits for that moment to pass.
 
 The notification never appears on the monitor that shows JW Library's secondary window, since that is the monitor being shared.
@@ -238,7 +247,7 @@ It only acts when all of these are true:
 
 1. JW Library is the selected app, meaning your last switch was `F9` (or an automatic hide of Zoom). Pressing `F10` minimizes JW Library on purpose, and that is left alone.
 2. A Zoom meeting is in progress. Outside a meeting nothing is being shared, so minimizing JW Library, for example with `Win+D`, works as normal.
-3. It is not fighting something. If the window is minimized again within a few seconds of being restored, three times in a row, the tool stops and shows a notification instead of flickering the shared screen. Tapping `F9` or `F10` starts it afresh.
+3. It is not fighting something. If the window is minimized again within a few seconds of being restored, three times in a row, the tool pauses for a minute and shows a notification instead of flickering the shared screen. Tapping `F9` or `F10` starts it afresh straight away.
 
 > [!NOTE] The window cannot be made truly unminimizable. Windows lets any program minimize any window, and refusing it would mean injecting code into a Windows system process that hosts JW Library's windows. Restoring it the moment it is minimized is the safe equivalent.
 
@@ -290,7 +299,8 @@ To build from source, clone the repository and open `*.csproj` in "Microsoft Vis
     * Run `InnoSetupScript.iss` which outputs generated Setup to `Setup` folder (Setup exe and uninstaller are also signed).
     * Verify all signatures (exe, dll, and installer).
     * Write a `.sha256` checksum next to the generated Setup.
-* `git commit --amend --no-edit` to fold the version bump into the commit.
+* `git commit -a --amend --no-edit` to fold the version bump into the commit.
+  * `-a` matters: the release script rewrites the version files but does not stage them.
   * Keeps one commit per release, and makes the tag point at a commit whose version files match its name. Safe because nothing has been pushed yet.
 * Tag the commit, `git tag v<version>`, then push both: `git push && git push --tags`.
 * Release from the tag, uploading **both** files from the `Setup` folder:
